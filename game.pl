@@ -32,6 +32,6 @@ export_transition(Out, Transition) :-
   (From, Arc, To) = Transition,
   dot_node(Out, From),
   dot_node(Out, To),
-  dot_arc(Out, From, To, []).
+  dot_arc(Out, From, To, [label(Arc)]).
 
   
