@@ -22,7 +22,7 @@ export :-
 
 export(Proof) :-
   gv_export(
-    'proof_tree.svg',
+    'proof_tree.png',
     {Proof}/[Out0]>>export_proof_(Out0, Proof),
     options{directed: true}
   ).

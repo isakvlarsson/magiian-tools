@@ -16,6 +16,14 @@ view_game():-
     [directed(true), method(dot)]
   ).
 
+export() :-
+  game(Game),
+  gv_export(
+    'game.png',
+    {Game}/[Out0]>>export_game(Out0, Game),
+    options{directed: true}
+  ).
+
 export_game(Out, Game) :-
   [Agents, Locations, Actions, Transitions, Observations] = Game,
   maplist(export_transition(Out), Transitions).
