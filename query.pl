@@ -2,6 +2,19 @@
 query_agents(Agents) :-
   findall(Agt, agent(Agt), Agents).
 
+query_locations(Locations) :-
+  findall(Location, location(Location), Locations).
+
+query_actions(Actions) :-
+  findall(Action, action(Action), Actions).
+
+query_transitions(Transitions) :-
+  findall((From, Actions, To), transition(From, Actions, To), Transitions).
+
+query_observations(Observations) :-
+  findall((Agent, Observation), observation(Agent, Observation), Observations).
+
+
 query_agent_index(Agent, Index) :-
   query_agents(Agents),
   nth0(Index, Agents, Agent), !.

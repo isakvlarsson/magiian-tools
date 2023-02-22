@@ -1,4 +1,5 @@
 :- [strategy].
+
 move(Location, Strategy, NextLocation) :-
   % get the joint_action associated with a Location
   member(Location-JointAction, Strategy),
@@ -19,4 +20,5 @@ main:-
   global_strategy(Strategy),
   findall(History, play(Initial, Strategy, 100, History), AllHistories),
   nl, write('new game!'), nl, write(AllHistories), nl.
+
 
