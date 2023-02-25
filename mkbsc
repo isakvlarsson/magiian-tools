@@ -1,2 +1,0 @@
-project(Agent, Game, ProjectedGame) :-
-  
