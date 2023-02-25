@@ -49,7 +49,7 @@ load_game(Game) :-
   read(Term),
   (
     Term == end_of_file -> true, !;
-    wrapped(Name, Term, Wrapped),
+    wrapped(Game, Term, Wrapped),
     assertz(Wrapped),
     fail
   ),
@@ -59,7 +59,6 @@ load_game(Game) :-
 % unloads the loaded game
 % is allways true
 unload_game(Game) :-
-  loaded(Game), 
   retractall(game(Game, _)),
   retract(loaded(Game)), !;
   true.
