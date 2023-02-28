@@ -65,7 +65,7 @@ unload_game(Game) :-
 
 % wraps a term in a game(Game, Term)
 % so that we know what game we are working
-% on
-wrapped(Game, Term, Wrapped) :-
-  Wrapped = game(Game, Term).
+% on, and so that we can work with multiple
+% expansions etc
+wrapped(Game, Term, game(Game, Term)).
 

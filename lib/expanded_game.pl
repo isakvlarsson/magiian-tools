@@ -41,7 +41,7 @@ create_expanded_game(Game, Expansion) :-
   Expansion > 0,
   writeln('not implemented').
 
-% unloads the loaded game
+% unloads a game
 % is allways true
 unload_expanded_game(Game, Expansion) :-
   retractall(expanded_game(Game, Expansion, _)),
@@ -49,8 +49,6 @@ unload_expanded_game(Game, Expansion) :-
   true.
 
 wrap_expanded_game(Game, Expansion, Term, expanded_game(Game, Expansion, Term)).
-
-
 
 %%%% project an expanded game onto a agent
 projection(Game, Expansion, Agent, Projection) :-
