@@ -33,10 +33,9 @@ transitions_to_dot(Out, Game) :-
       game(Game, transition(From, _, To)),
       findall(JointAction, game(Game, transition(From, JointAction, To)), JointActions),
       dot_arc(Out, From, To, [label(JointActions)]);
-      % this is a hacky thing to write something to the stream
-      % in the case where there is no transition between the locations
-      % (it was crashing when there were no transition and I dont care to improve this more)
-      dot_node(Out, From)
+      % when there is no transition between two locations
+      % we write nothing to the stream
+      format(Out, '', [])
       )
     )
   )
