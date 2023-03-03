@@ -1,36 +1,40 @@
-%% query the database for information abaout a loaded game
-agents(Game, Agents) :-
-  findall(agent(Agent), game(Game, agent(Agent)), Agents).
+% Load a game into the database
+load_game(Game) :-
+  unload_game(Game),
+  atom_concat('games/', Game, F0), atom_concat(F0, '.pl', Filename),
+  see(Filename), 
+  repeat, 
+  read(Term),
+  (
+    Term == end_of_file -> true, !;
+    assertz(game(Game, Term)),
+    fail % in order to backtrack to read from here
+  ),
+  assertz(loaded(Game)),
+  seen.
 
-actions(Game, Actions) :-
-  findall(action(Action),
-          game(Game, action(Action)),
-          Actions).
+% unloads the loaded game
+% is allways true
+unload_game(Game) :-
+  retractall(game(Game, _)),
+  retract(loaded(Game)), !;
+  true.
 
-locations(Game, Locations) :-
-  findall(location(Location),
-          game(Game, location(Location)),
-          Locations).
+% helper functions for interacting with the game
+% 0 indexed
+agent_index(Game, Agent, Index) :-
+  findall(Agent, game(Game, Agent), Agents),
+  nth0(Index, Agents, Agent).
 
-initial(Game, Initial) :-
-  game(Game, initial(I)),
-  Initial = initial(I).
-
-transitions(Game, Transitions) :-
-  findall(transition(From, JointTransition, To),
-          game(Game, transition(From, JointTransition, To)),
-          Transitions).
-
-observations(Game, Observations) :-
-  findall(observation(Agent, Observation),
-          game(Game, observation(Agent, Observation)),
-          Observations).
-
-%% project a game onto an agent
-projection(Agent, Projection) :-
-  agents(Agents), nth0(Index, Agents, Agent),
-  findall(transition(From, Action, To), 
-          (transition(From, JointActions, To), nth0(Index, JointActions, Action)),
-          Transitions), 
-  Projection = Transitions.
-
+% Compute the individual and joint knowledge states of a game
+game_knowledge_state(Game, Location, KnowledgeState) :-
+  findall(
+    AgentKnowledgeState,
+    game_knowledge_state(Game, Agent, Location, AgentKnowledgeState),
+    KnowledgeState
+  ).
+game_knowledge_state(Game, Agent, Location, KnowledgeState) :-
+  game(Game, location(Location)),
+  game(Game, observation(Agent, Observation)),
+  member(Location, Observation),
+  KnowledgeState = Observation.

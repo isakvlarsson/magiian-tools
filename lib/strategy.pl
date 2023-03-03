@@ -1,4 +1,4 @@
-:- [query].
+
 % generate all possible strategies on the form [location-[agent1_action, agent2_action, ...], ...]
 global_strategy(Strategy) :-
   query_agents(Agents), 

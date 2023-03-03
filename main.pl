@@ -1,7 +1,6 @@
 :- [lib/game].
 :- [lib/strategy].
 :- [lib/visualize].
-:- [lib/parser].
 :- [lib/expanded_game].
 :- [lib/utils].
 % load the wagon game for convenience
