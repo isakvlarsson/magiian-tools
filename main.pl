@@ -1,10 +1,8 @@
 :- [lib/game].
-:- [lib/strategy].
 :- [lib/visualize].
 :- [lib/expanded_game].
 :- [lib/utils].
-% load the wagon game for convenience
-:- load_game(wagon_game).
 
 main :-
-  write("running").
+  load_game(wagon_game),
+  create_expanded_game(wagon_game, 0).

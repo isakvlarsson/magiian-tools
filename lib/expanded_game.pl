@@ -51,7 +51,7 @@ create_expanded_game_projection(Game, Expansion, Agent) :-
   % the agent should only see its own action for the transitions
   forall(
     expanded_game(Game, Expansion, transition(From, JointActions, To))
-  )
+  ),
   % it should only see it's own knowledge state
   % it should only see it's own observation partitionings
   findall(

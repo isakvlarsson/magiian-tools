@@ -23,8 +23,26 @@ unload_game(Game) :-
 % helper functions for interacting with the game
 % 0 indexed
 agent_index(Game, Agent, Index) :-
-  findall(Agent, game(Game, Agent), Agents),
-  nth0(Index, Agents, Agent).
+  findall(Agt, game(Game, agent(Agt)), Agents),
+  nth0(Index, Agents, Agent), !.
+
+% create the projection of the game of an agent
+% This only creates new transitions because the
+% rest of the game stays the same.
+create_game_projection(Game, Agent) :-
+  unload_game_projection(Game, Agent),
+  agent_index(Game, Agent, Index),
+  forall(
+    game(Game, transition(From, JointAction, To)),
+    (
+      nth0(Index, JointAction, Action),
+      assertz(game_projection(Game, Agent, transition(From, Action, To)))
+    )
+  ).
+
+unload_game_projection(Game, Agent) :-
+  retractall(game_projection(Game, Agent, _)), !;
+  true.
 
 % Compute the individual and joint knowledge states of a game
 game_knowledge_state(Game, Location, KnowledgeState) :-
