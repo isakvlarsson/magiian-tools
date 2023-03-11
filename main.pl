@@ -1,8 +1,14 @@
 :- [lib/game].
 :- [lib/visualize].
-:- [lib/expanded_game].
 :- [lib/utils].
 
 main :-
-  load_game(wagon_game),
-  create_expanded_game(wagon_game, 0).
+  Game = wagon_game,
+  load_game(Game),
+  forall(
+    game(Game, agent(Agent)),
+    (
+      create_projection(Game, 0, Agent),
+      create_projection_expansion(Game, 0, Agent)
+    )
+  ).

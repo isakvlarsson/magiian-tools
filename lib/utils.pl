@@ -1,15 +1,20 @@
-singleton(Elem, [Elem]).
+%% predicate to generate a set of all solutions
+% sort of lake findall but with only unique solutions
+setofall(Template, Goal, Set) :-
+  findall(Template, Goal, Bag),
+  sort(Bag, Set).
 
-singleton_term(Term, SingletonTerm) :-
-  Term =.. [Predicate|Arguments],
-  maplist(singleton, Arguments, SingletonArguments),
-  SingletonTerm =.. [Predicate|SingletonArguments].
 
-% stolen from https://stackoverflow.com/questions/65581395/powerset-o-a-setlist-in-prolog
-% my_subset(Set, Subset).
-my_subset([], []).
-my_subset([_|T], R):- my_subset(T, R).     % does not include first element
-my_subset([H|T], [H|R]):- my_subset(T,R).  % do include first element  
+intersection_all(Lists, I) :-
+  flatten(Lists, F), sort(F, Acc),
+  intersection_all(Lists, Acc, I).
 
-powerset(Set, Powerset) :-
-  findall(Subset, my_subset(Set, Subset), Powerset).
+intersection_all([], I, I).
+intersection_all([H|T], Acc, I) :-
+  intersection(H, Acc, NewAcc),
+  intersection_all(T, NewAcc, I).
+
+
+my_flatten([], []).
+my_flatten([A|B],L) :- is_list(A), my_flatten(B,B1), !, append(A,B1,L).
+my_flatten([A|B],[A|B1]) :- my_flatten(B,B1).
