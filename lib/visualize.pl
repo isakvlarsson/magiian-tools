@@ -11,10 +11,10 @@ view_game(Game, Expansion) :-
     [directed(true), method(dot)]
   ).
 
-export_game(Game) :-
+export_game(Game, Expansion) :-
   gv_export(
     'game.png',
-    {Game}/[Out0]>>game_to_dot(Out0, Game),
+    {Game}/[Out0]>>game_to_dot(Out0, Game, Expansion),
     [directed(true)]
   ).
 

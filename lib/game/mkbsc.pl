@@ -45,7 +45,7 @@ transitions_in_expansion_from(Game, Expansion, JointKnowledge, T) :-
       % generate s_i for all agents
       findall(Agent, game(Game, agent(Agent)), Agents),
       findall(
-        transition(JointKnowledge, JointAction, I),
+        transition(JointKnowledge, JointAction, K),
         (
           maplist(projection_expansion(Game, Expansion), Agents, JointKnowledge, JointAction, K),
           maplist(intersection(S), K, I),
