@@ -24,8 +24,12 @@ game_to_dot(Out, Game, Expansion) :-
   observations_to_dot(Out, Game, Expansion).
 
 locations_to_dot(Out, Game, Expansion) :-
-  forall(game(Game, Expansion, location(Location)), 
-         dot_node(Out, Location)).
+  forall(
+    game(Game, Expansion, location(Location)), 
+    (
+      dot_node(Out, Location)
+    )
+  ).
 
 transitions_to_dot(Out, Game, Expansion) :-
   forall(game(Game, Expansion, location(From)), (
@@ -43,68 +47,40 @@ transitions_to_dot(Out, Game, Expansion) :-
 ).
 
 observations_to_dot(Out, Game, Expansion) :-
-  forall(game(Game, agent(Agent)), (
-  forall(game(Game, Expansion, observation(Agent, Observation)), (
-  % if there are more than one location in an observation
-  [A, B] = Observation, my_dot_arc(Out, A, B, Agent);
-  [A] = Observation, dot_node(Out, A)
-)))).
-
-my_dot_arc(Out, From, To, Agent) :-
-  ascii_id(From, FromId),
-  ascii_id(To, ToId),
-  format(Out, '~a -> ~a [color="red", dir="none", label="~~ ~a"];\n', [FromId, ToId, Agent]).
-
-
-
-
-
-%% view a projection of a game onto an agent
-view_game_projection(Game, Agent) :-
-  gv_view(
-    {Game, Agent}/[Out0]>>game_projection_to_dot(Out0, Game, Agent),
-    [directed(true), method(dot)]
-  ).
-
-game_projection_to_dot(Out, Game, Agent) :- 
-  % reuse the same as for the original game
-  locations_to_dot(Out, Game),
-  % needs new predicates
-  projection_transitions_to_dot(Out, Game, Agent).
-  %projection_observations_to_dot(Out, Game, Agent).
-
-projection_transitions_to_dot(Out, Game, Agent) :-
   forall(
-    game(Game, location(From)),
+    game(Game, agent(Agent)),
     (
       forall(
-        game(Game, location(To)),
-        (
-          % we only want to display transitions that exist
-          game_projection(Game, Agent, transition(From, _, To)),
-          findall(Action, game_projection(Game, Agent, transition(From, Action, To)), Actions), 
-          list_to_set(Actions, UniqueActions),
-          dot_arc(Out, From, To, [label(UniqueActions)]);
-          % when there is no transition between two locations
-          % we write nothing to the stream
-          format(Out, '', [])
-        )
-      )
-    )
-  ).
-
-observations_to_dot(Out, Game) :-
-  forall(
-    game(Game, agent(Agent)), 
-    (
-      forall(
-        game(Game, observation(Agent, Observation)),
+        game(Game, Expansion, observation(Agent, Observation)),
         (
           % if there are more than one location in an observation
-          [A, B] = Observation, my_dot_arc(Out, A, B, Agent);
-          [A] = Observation, dot_node(Out, A)
+          Observation \== [_],
+          % link it to all the other observaitons
+          forall(
+            (
+              member(L1, Observation),
+              member(L2, Observation),
+              L1 \== L2
+            ),
+            (
+              dot_observation_arc(Out, Game, L1, L2, Agent)
+            )
+          )
         )
       )
     )
   ).
 
+dot_observation_arc(Out, Game, From, To, Agent) :-
+  ascii_id(From, FromId),
+  ascii_id(To, ToId),
+  agent_color(Game, Agent, Color),
+  format(Out, '~a -> ~a [color="~a", dir="none", style="dashed", label="~~ ~a"];\n', [FromId, ToId, Color, Agent]).
+
+
+%% specifies the color of the agent's observations
+agents_colors(['red', 'blue', 'green']).
+agent_color(Game, Agent, Color) :-
+  agent_index(Game, Agent, Index),
+  agents_colors(Colors),
+  nth0(Index, Colors, Color).

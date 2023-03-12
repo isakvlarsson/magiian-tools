@@ -5,10 +5,5 @@
 main :-
   Game = wagon_game,
   load_game(Game),
-  forall(
-    game(Game, agent(Agent)),
-    (
-      create_projection(Game, 0, Agent),
-      create_projection_expansion(Game, 0, Agent)
-    )
-  ).
+  create_expanded_game(Game, 1),
+  create_expanded_game(Game, 2).

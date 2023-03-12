@@ -1,3 +1,4 @@
+:- use_module(library(term_ext)).
 /*
  * ################## Load game ###################
  * */
@@ -33,8 +34,27 @@ agent_index(Game, Agent, Index) :-
   findall(Agt, game(Game, agent(Agt)), Agents),
   nth0(Index, Agents, Agent), !.
 
-% refer to the original game without the 0-expansion
+% To refer to the original game without the 0-expansion
 game(Game, Term) :-
   game(Game, 0, Term).
+
+
+/*
+ * The names of the locations in the expanded games grows
+ * exponentially so we need to give the locations an Id
+ * instead.
+ * */
+%% store the id of a location with its real name
+create_location_id(Location, Id) :-
+  ascii_id(Location, Id),
+  assert(location_id(Location, Id)).
+
+%% get the real name associated with an id
+expand_location_id(Id, Knowledge) :-
+  location_id(Expanded, Id).
+
+
+
+
 
 

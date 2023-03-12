@@ -41,6 +41,7 @@ post(Game, Expansion, Agent, S1, Action, S2) :-
 
 %% finds a set of transitions in the expanded game
 % that goes out from the location Si
+% this is a useful helper when implementing kbsc
 expanded_neighbor_transitions(Game, Expansion, Agent, Si, Transitions) :-
   setofall(
     transition(Si, Action, Intersection),

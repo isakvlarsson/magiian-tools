@@ -30,18 +30,20 @@ post(Game, Expansion, S1, JointAction, S2) :-
   ).
 
 
-neighbor_transitions(Game, Expansion, JointKnowledge, T) :-
+%% generates the transitions in a game that goes out from
+% a knowledge-state
+transitions_in_expansion_from(Game, Expansion, JointKnowledge, T) :-
   % we first generate all possible transitions
   intersection_all(JointKnowledge, CommonKnowledge),
   setofall(
-    Transition,
+    ActionTransitions,
     (
       % we want to do this for all actions (that exist in the game)
       joint_action(Game, JointAction),
       % generete s
       post(Game, Expansion, CommonKnowledge, JointAction, S), S \== [],
       % generate s_i for all agents
-      findall(Agent, game(Game, Expansion, agent(Agent)), Agents),
+      findall(Agent, game(Game, agent(Agent)), Agents),
       findall(
         transition(JointKnowledge, JointAction, I),
         (
@@ -49,7 +51,7 @@ neighbor_transitions(Game, Expansion, JointKnowledge, T) :-
           maplist(intersection(S), K, I),
           \+intersection_all(I, [])
         ),
-        Transition
+        ActionTransitions
       )
     ),
     Transitions
@@ -83,7 +85,7 @@ synchronous_product(Game, Expansion) :-
   
 synchronous_product(_, _, []) :- !.
 synchronous_product(Game, Expansion, [JointKnowledge|Queue]) :-
-  neighbor_transitions(Game, Expansion, JointKnowledge, Transitions),
+  transitions_in_expansion_from(Game, Expansion, JointKnowledge, Transitions),
   % add all transitions
   NextExpansion is Expansion + 1,
   forall(
@@ -105,38 +107,64 @@ synchronous_product(Game, Expansion, [JointKnowledge|Queue]) :-
   synchronous_product(Game, Expansion, NewQueue).
 
 
+%% Find all observations of an agent in a game
+% using the definition of what the observation
+% partitioning should be in the expanded game.
+% (The games locations needs to be calculated first)
+agent_observations(Game, Expansion, Agent, Observations) :-
+  setofall(
+    Obs,
+    (
+      game(Game, Expansion, location(JointKnowledge)),
+      agent_index(Game, Agent, Index),
+      nth0(Index, JointKnowledge, Knowledge),
+      setofall(
+        AnotherJointKnowledge,
+        (
+          game(Game, Expansion, location(AnotherJointKnowledge)),
+          nth0(Index, AnotherJointKnowledge, Knowledge)
+        ),
+        Obs
+      )
+    ),
+    Observations
+  ).
+
+
 %% create an expanded game with mkbsc
+create_expanded_game(_, 0) :- !.
 create_expanded_game(Game, Expansion) :-
   unload_expanded_game(Game, Expansion),
   PreviousExpansion is Expansion - 1,
+  create_expanded_game(Game, PreviousExpansion),
   forall(
     game(Game, agent(Agent)),
-    create_projection(Game, PreviousExpansion, Agent)
+    (
+      create_projection(Game, PreviousExpansion, Agent),
+      create_projection_expansion(Game, PreviousExpansion, Agent)
+    )
   ),
   synchronous_product(Game, PreviousExpansion),
   % create the observation partitioning
   forall(
     game(Game, agent(Agent)),
     (
-      setofall(
-        Equal,
-        (
-          game(Game, Expansion, location(Location)), 
-          Equal = [Location]
-        ),
-        Observations
-      ),
       forall(
-        member(Observation, Observations),
+        (
+          agent_observations(Game, Expansion, Agent, Observations),
+          member(Observation, Observations)
+        ),
         assertz(game(Game, Expansion, observation(Agent, Observation)))
       )
     )
-  ).
+  ),
+  assertz(loaded(Game, Expansion)).
 
 
 
 unload_expanded_game(Game, Expansion) :-
-  retractall(game(Game, Expansion, _)), !;
+  retractall(game(Game, Expansion, _)),
+  retract(loaded(Game, Expansion)), !;
   true.
  
 
