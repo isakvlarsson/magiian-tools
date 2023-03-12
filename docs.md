@@ -59,21 +59,23 @@ observation(p2, [left]).
 observation(p2, [middle, right]).
 ```
 
-## Memoryless strategy representation
-We represent strategies as a new game graph where the actions for each location
-and player have been picked already. So a memoryless strategy is represented as
-a set of transitions:
+## dependencies
 
-```prolog
-[(start, [init, init], left), (start, [init, init], middle), ...,
-(middle, (push, wait), right), ...]
-```
+* `swipl`
+* Graphviz
+* [prolog_graphviz](https://github.com/wouterbeek/prolog_graphviz)
 
-Meaning that when at a specifik location a specified action is taken. When the
-action is nondeterministic, it's outcome can vary.
+## some useful commands / predicates
 
-### Generating strategies
-
-1. Map observations to actions for each player.
-2. Map each location in the same observation to the action of the observation.
-3. Merge the independent strategies to a "global strategy".
+* Start the program with `swipl main.pl`.
+* Load a game from the `games` directory with `load_game/1`. For example `?-
+  load_game(wagon_game)`.
+* Create an mkbsc-expansion of a game with `create_expanded_game/2`. For example
+  `?- create_expanded_game(wagon_game, 3)` (this would create all expansions of
+  that game up to 3).
+* View a game with `view_game/2`. For example `view_game(wagon_game, 0)` to view
+  the original version of that game, or `view_game(wagon_game, 2)` to view that
+  game expanded 2 times with mkbsc. (I have only tested this on linux).
+* Export an image of a game with `export_game/2`. This works the same as
+  `view_game/2` but instead of opening a window with a picure of that game, an
+  image is created.

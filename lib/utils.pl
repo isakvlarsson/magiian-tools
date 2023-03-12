@@ -21,4 +21,6 @@ my_flatten([A|B],L) :- is_list(A), my_flatten(B,B1), !, append(A,B1,L).
 my_flatten([A|B],[A|B1]) :- my_flatten(B,B1).
 
 
+forallpairs(First, [H|T], Action) :-
+  
 
