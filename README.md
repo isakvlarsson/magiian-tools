@@ -41,6 +41,11 @@ equal(simon, [left, middle]).
 equal(sam, [middle, right]).
 ```
 
+Internaly the games are represented a little differently. The above game would
+look like this when viewed.
+
+![wagon game](./game.png)
+
 ## dependencies
 
 * [swipl](https://www.swi-prolog.org/)
