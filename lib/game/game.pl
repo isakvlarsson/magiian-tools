@@ -1,4 +1,5 @@
 :- use_module(library(term_ext)).
+:- dynamic game/3.
 /*
  * ################## Load game ###################
  * */
@@ -38,23 +39,9 @@ agent_index(Game, Agent, Index) :-
 game(Game, Term) :-
   game(Game, 0, Term).
 
-
-/*
- * The names of the locations in the expanded games grows
- * exponentially so we need to give the locations an Id
- * instead.
- * */
-%% store the id of a location with its real name
-create_location_id(Location, Id) :-
-  ascii_id(Location, Id),
-  assert(location_id(Location, Id)).
-
-%% get the real name associated with an id
-expand_location_id(Id, Knowledge) :-
-  location_id(Expanded, Id).
-
-
-
-
-
+% these allow us to get all possible jointactions in a game
+agent_action(Game, _, Action) :- game(Game, action(Action)).
+joint_action(Game, JointAction) :-
+  findall(Agent, game(Game, agent(Agent)), Agents),
+  maplist(agent_action(Game), Agents, JointAction).
 
