@@ -208,6 +208,7 @@ create_expanded_game(Game, Expansion) :-
 
 
 unload_expanded_game(Game, Expansion) :-
+  Expansion > 0,
   retractall(game(Game, Expansion, _)),
   retract(loaded(Game, Expansion)), !;
   true.

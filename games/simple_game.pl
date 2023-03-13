@@ -1,17 +1,8 @@
 % Agt
-agent(p1).
-agent(p2).
-
-% L
-location(left).
-location(right).
+agents([p1, p2]).
 
 % l_0
 initial(left).
-
-% Act
-action(push).
-action(wait).
 
 % delta
 % from left
@@ -24,10 +15,3 @@ transition(right, [wait, wait], right).
 transition(right, [wait, push], left).
 transition(right, [push, push], right).
 transition(right, [push, wait], right).
-
-% Obs_i for each player
-observation(p1, [left]).
-observation(p1, [right]).
-
-observation(p2, [right]).
-observation(p2, [left]).

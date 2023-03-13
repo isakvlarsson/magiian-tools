@@ -1,22 +1,13 @@
-% Agt
-agent(p1).
-agent(p2).
+% a list of the agents that are playing
+agents([simon, sam]).
 
-% L
-location(start).
-location(left).
-location(middle).
-location(right).
-
-% l_0
+% The initial location
 initial(start).
 
-% Act
-action(init).
-action(push).
-action(wait).
-
-% delta
+% delta - these implicitly define
+% * locations in the game
+% * actions in the game
+% * actions for each agent
 % from start
 transition(start, [init, init], left).
 transition(start, [init, init], middle).
@@ -37,11 +28,7 @@ transition(right, [wait, push], middle).
 transition(right, [push, push], right).
 transition(right, [push, wait], right).
 
-% Obs_i for each player
-observation(p1, [start]).
-observation(p1, [left, middle]).
-observation(p1, [right]).
-
-observation(p2, [start]).
-observation(p2, [left]).
-observation(p2, [middle, right]).
+%% equivalence relations, signifies that the locations
+% here are equal regarding to an agent
+equal(simon, [left, middle]).
+equal(sam, [middle, right]).

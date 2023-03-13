@@ -1,17 +1,6 @@
-agent(p1).
-agent(p2).
-
-location(start).
-location(bad).
-location(good).
-location(lose).
-location(win).
+agents([p1, p2]).
 
 initial(start).
-
-action(grab).
-action(squeeze).
-action(lift).
 
 transition(start, [grab, grab], bad).
 transition(start, [grab, grab], good).
@@ -28,14 +17,5 @@ transition(good, [squeeze, lift], lose).
 
 transition(win, [lift, lift], win).
 
-observation(p1, [start]).
-observation(p1, [bad]).
-observation(p1, [good]).
-observation(p1, [lose]).
-observation(p1, [win]).
-
-observation(p2, [start]).
-observation(p2, [bad, good]).
-observation(p2, [lose]).
-observation(p2, [win]).
+equal(p2, [bad, good]).
 
