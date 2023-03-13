@@ -1,12 +1,37 @@
 /*
+ * ############# Location pointers #########################
+ * */
+/*
+ * The names of the locations/knowledge-states in the expanded games grows
+ * exponentially. The locations should instead be stored 
+ * as pointers.
+ *
+ * These pointers are keys in a key value store
+ * of the locations/knowledge-states, and for now
+ * they are generated with the `ascii_id/2` predicate
+ * which generates a hash for a term. These are not
+ * guaranteed to be unique but the chance for that
+ * is probably microscopical.
+ * */
+
+%% store the id of a location with its real name
+% only stores a pointer once
+:- dynamic location_pointer/3.
+create_location_pointer(Game, Location, Pointer) :-
+  location_pointer(Game, Location, Pointer), !;
+  ascii_id(Location, Pointer),
+  assert(location_pointer(Game, Location, Pointer)).
+
+
+/*
  * ####################### MKBSC ##############################
  * These predicates handle expansion of a game to a higher order
  * of knowledge with the MKBSC algorithm.
  *
- * The MKBSC algorithm works as folows:
+ * The MKBSC algorithm works as follows:
  * 1. project the game to all agents and run the
  *    KBSC algorithm on these individual games.
- * 2. Combine the individual expansions into a multilayer
+ * 2. Combine the individual expansions into a multiagent
  *    game with the "synchronous product" (basically playing
  *    the games concurently)
  * 3. The observation-partitioning in the expanded game is defined
@@ -18,7 +43,13 @@
  * here: https://kth.diva-portal.org/smash/get/diva2:1221520/FULLTEXT01.pdf
  * */
 
+
+
+
+
 %% the post function for a multi-agent game
+% it gives all locations that can be reached
+% by takin a JointAction in a list of locations
 post(Game, Expansion, S1, JointAction, S2) :-
   setofall(
     S2member,
@@ -62,13 +93,6 @@ transitions_in_expansion_from(Game, Expansion, JointKnowledge, T) :-
 projection_expansion(Game, Expansion, Agent, S1, Action, S2) :-
   projection_expansion(Game, Expansion, Agent, transition(S1, Action, S2)).
 
-% these are helper predicates to allow us to get all possible jointactions
-agent_action(Game, _, Action) :- game(Game, action(Action)).
-joint_action(Game, JointAction) :-
-  findall(Agent, game(Game, agent(Agent)), Agents),
-  maplist(agent_action(Game), Agents, JointAction).
-
-
 
 
 %% The synchronous product combines single-agent games into a multi-agent game
@@ -79,8 +103,9 @@ synchronous_product(Game, Expansion) :-
   NextExpansion is Expansion + 1,
   % add the initial state
   findall(I, projection_expansion(Game, Expansion, _, initial(I)), Initial),
-  assertz(game(Game, NextExpansion, initial(Initial))),
-  assertz(game(Game, NextExpansion, location(Initial))),
+  create_location_pointer(Game, Initial, InitialPointer),
+  assertz(game(Game, NextExpansion, initial(InitialPointer))),
+  assertz(game(Game, NextExpansion, location(InitialPointer))),
   synchronous_product(Game, Expansion, [Initial]).
   
 synchronous_product(_, _, []) :- !.
@@ -89,17 +114,22 @@ synchronous_product(Game, Expansion, [JointKnowledge|Queue]) :-
   % add all transitions
   NextExpansion is Expansion + 1,
   forall(
-    member(Transition, Transitions),
-    assertz(game(Game, NextExpansion, Transition))
+    member(transition(F, Act, T), Transitions),
+    (
+      create_location_pointer(Game, F, FP),
+      create_location_pointer(Game, T, TP),
+      assertz(game(Game, NextExpansion, transition(FP, Act, TP)))
+    )
   ),
   % add the unvisited locations to the queue
   setofall(
     K2,
     (
-      member(transition(JointKnowledge, JointAction, K2), Transitions),
-      \+game(Game, NextExpansion, location(K2)),
-      % save the location
-      assertz(game(Game, NextExpansion, location(K2)))
+      member(transition(JointKnowledge, _JointAction, K2), Transitions),
+      location_pointer(Game, K2, K2P),
+      \+game(Game, NextExpansion, location(K2P)),
+      % save the location (-pointer)
+      assertz(game(Game, NextExpansion, location(K2P)))
     ),
     Unvisited
   ),
@@ -115,13 +145,15 @@ agent_observations(Game, Expansion, Agent, Observations) :-
   setofall(
     Obs,
     (
-      game(Game, Expansion, location(JointKnowledge)),
+      game(Game, Expansion, location(JointKnowledgeP)),
+      location_pointer(Game, JointKnowledge, JointKnowledgeP),
       agent_index(Game, Agent, Index),
       nth0(Index, JointKnowledge, Knowledge),
       setofall(
-        AnotherJointKnowledge,
+        AnotherJointKnowledgeP,
         (
-          game(Game, Expansion, location(AnotherJointKnowledge)),
+          game(Game, Expansion, location(AnotherJointKnowledgeP)),
+          location_pointer(Game, AnotherJointKnowledge, AnotherJointKnowledgeP),
           nth0(Index, AnotherJointKnowledge, Knowledge)
         ),
         Obs
@@ -136,7 +168,11 @@ create_expanded_game(_, 0) :- !.
 create_expanded_game(Game, Expansion) :-
   unload_expanded_game(Game, Expansion),
   PreviousExpansion is Expansion - 1,
-  create_expanded_game(Game, PreviousExpansion),
+  % make sure the previous expansion is loaded or load it
+  (
+    loaded(Game, PreviousExpansion), !;
+    create_expanded_game(Game, PreviousExpansion)
+  ),
   forall(
     game(Game, agent(Agent)),
     (
@@ -154,12 +190,13 @@ create_expanded_game(Game, Expansion) :-
           agent_observations(Game, Expansion, Agent, Observations),
           member(Observation, Observations)
         ),
-        assertz(game(Game, Expansion, observation(Agent, Observation)))
+        (
+          assertz(game(Game, Expansion, observation(Agent, Observation)))
+        )
       )
     )
   ),
   assertz(loaded(Game, Expansion)).
-
 
 
 unload_expanded_game(Game, Expansion) :-

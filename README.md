@@ -61,8 +61,8 @@ observation(p2, [middle, right]).
 
 ## dependencies
 
-* `swipl`
-* Graphviz
+* [swipl](https://www.swi-prolog.org/)
+* [Graphviz](https://graphviz.org/)
 * [prolog_graphviz](https://github.com/wouterbeek/prolog_graphviz)
 
 ## some useful commands / predicates

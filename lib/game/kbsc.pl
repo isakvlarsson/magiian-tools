@@ -1,3 +1,5 @@
+:- dynamic projection/4.
+:- dynamic projection_expansion/4.
 /*
  * ########################## KBSC ######################
  * these predicates handle projeciton of a multi-agent game
@@ -71,7 +73,9 @@ create_projection_expansion(Game, Expansion, Agent, [Si|Queue]) :-
   % save the transitions
   forall(
     member(T, NT),
-    assertz(projection_expansion(Game, Expansion, Agent, T))
+    (
+      assertz(projection_expansion(Game, Expansion, Agent, T))
+    )
   ),
   % take the cells in NT that we have not visited yet
   findall(
