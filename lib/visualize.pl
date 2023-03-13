@@ -27,7 +27,8 @@ locations_to_dot(Out, Game, Expansion) :-
   forall(
     game(Game, Expansion, location(Location)), 
     (
-      dot_node(Out, Location)
+      unfold_location_pointer(Game, Name, Location),
+      dot_node_id(Out, Location, [label(Name)])
     )
   ).
 
@@ -37,7 +38,7 @@ transitions_to_dot(Out, Game, Expansion) :-
       % we only want to display transitions that exist
       game(Game, Expansion, transition(From, _, To)),
       findall(JointAction, game(Game, Expansion, transition(From, JointAction, To)), JointActions),
-      dot_arc(Out, From, To, [label(JointActions)]);
+      dot_arc_id(Out, From, To, [label(JointActions)]);
       % when there is no transition between two locations
       % we write nothing to the stream
       format(Out, '', [])
@@ -57,21 +58,34 @@ observations_to_dot(Out, Game, Expansion) :-
     )
   ).
 
+
+%% writes a dot_observation_arc between all members 
+% of the observation
 equivalence_relation_to_dot(Out, _, _, []) :-
   format(Out, '', []).
 equivalence_relation_to_dot(Out, Game, Agent, [H|T]) :-
   forall(
     member(Obs, T),
-    dot_observation_arc(Out, Game, H, Obs, Agent)
+    dot_observation_arc_id(Out, Game, H, Obs, Agent)
   ),
   equivalence_relation_to_dot(Out, Game, Agent, T).
 
+
+
+%% Output an observation relation between two nodes
+% to the dot stream
 dot_observation_arc(Out, Game, From, To, Agent) :-
   ascii_id(From, FromId),
   ascii_id(To, ToId),
   agent_color(Game, Agent, Color),
   format(Out, '~a -> ~a [color="~a", dir="none", style="dashed", label="~~ ~a"];\n', [FromId, ToId, Color, Agent]).
 
+
+%% same as dot observation_arc/5 but one supplies their
+% own ids for the nodes involved
+dot_observation_arc_id(Out, Game, FromId, ToId, Agent) :-
+  agent_color(Game, Agent, Color),
+  format(Out, '~a -> ~a [color="~a", dir="none", style="dashed", label="~~ ~a"];\n', [FromId, ToId, Color, Agent]).
 
 %% specifies the color of the agent's observations
 agents_colors(['red', 'blue', 'green']).

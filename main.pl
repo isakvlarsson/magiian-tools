@@ -5,5 +5,4 @@
 main :-
   Game = wagon_game,
   load_game(Game),
-  create_expanded_game(Game, 1),
-  create_expanded_game(Game, 2).
+  create_expanded_game(Game, 5).

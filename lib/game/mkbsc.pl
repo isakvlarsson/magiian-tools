@@ -10,7 +10,7 @@
  * of the locations/knowledge-states, and for now
  * they are generated with the `ascii_id/2` predicate
  * which generates a hash for a term. These are not
- * guaranteed to be unique but the chance for that
+ * guaranteed to be unique but the chance for an overlap
  * is probably microscopical.
  * */
 
@@ -22,6 +22,17 @@ create_location_pointer(Game, Location, Pointer) :-
   ascii_id(Location, Pointer),
   assert(location_pointer(Game, Location, Pointer)).
 
+
+%% extracts the real name of a knowledge-state
+% used for visualization purposes
+unfold_location_pointer(Game, Location, Pointer) :-
+  \+is_list(Pointer),
+  \+location_pointer(Game, _, Pointer),
+  Location = Pointer, !;
+  location_pointer(Game, List, Pointer),
+  maplist(unfold_location_pointer(Game), Location, List), !.
+unfold_location_pointer(Game, Location, Pointers) :-
+  maplist(unfold_location_pointer(Game), Location, Pointers), !.
 
 /*
  * ####################### MKBSC ##############################
@@ -42,9 +53,6 @@ create_location_pointer(Game, Location, Pointer) :-
  * A good description of the algorithm and its implementation is given 
  * here: https://kth.diva-portal.org/smash/get/diva2:1221520/FULLTEXT01.pdf
  * */
-
-
-
 
 
 %% the post function for a multi-agent game
