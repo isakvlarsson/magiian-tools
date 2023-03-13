@@ -52,24 +52,19 @@ observations_to_dot(Out, Game, Expansion) :-
     (
       forall(
         game(Game, Expansion, observation(Agent, Observation)),
-        (
-          % if there are more than one location in an observation
-          Observation \== [_],
-          % link it to all the other observaitons
-          forall(
-            (
-              member(L1, Observation),
-              member(L2, Observation),
-              L1 \== L2
-            ),
-            (
-              dot_observation_arc(Out, Game, L1, L2, Agent)
-            )
-          )
-        )
+        equivalence_relation_to_dot(Out, Game, Agent, Observation)
       )
     )
   ).
+
+equivalence_relation_to_dot(Out, _, _, []) :-
+  format(Out, '', []).
+equivalence_relation_to_dot(Out, Game, Agent, [H|T]) :-
+  forall(
+    member(Obs, T),
+    dot_observation_arc(Out, Game, H, Obs, Agent)
+  ),
+  equivalence_relation_to_dot(Out, Game, Agent, T).
 
 dot_observation_arc(Out, Game, From, To, Agent) :-
   ascii_id(From, FromId),

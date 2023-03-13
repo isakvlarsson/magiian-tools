@@ -6,7 +6,7 @@ setofall(Template, Goal, Set) :-
 
 
 intersection_all(Lists, I) :-
-  my_flatten(Lists, F), sort(F, Acc),
+  flatten(Lists, F), sort(F, Acc),
   intersection_all(Lists, Acc, I).
 
 intersection_all([], I, I).
