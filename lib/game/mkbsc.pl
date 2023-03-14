@@ -1,40 +1,4 @@
 /*
- * ############# Location pointers #########################
- * */
-/*
- * The names of the locations/knowledge-states in the expanded games grows
- * exponentially. The locations should instead be stored 
- * as pointers.
- *
- * These pointers are keys in a key value store
- * of the locations/knowledge-states, and for now
- * they are generated with the `ascii_id/2` predicate
- * which generates a hash for a term. These are not
- * guaranteed to be unique but the chance for an overlap
- * is probably microscopical.
- * */
-
-%% store the id of a location with its real name
-% only stores a pointer once
-:- dynamic location_pointer/3.
-create_location_pointer(Game, Location, Pointer) :-
-  location_pointer(Game, Location, Pointer), !;
-  ascii_id(Location, Pointer),
-  assert(location_pointer(Game, Location, Pointer)).
-
-
-%% extracts the real name of a knowledge-state
-% used for visualization purposes
-unfold_location_pointer(Game, Location, Pointer) :-
-  \+is_list(Pointer),
-  \+location_pointer(Game, _, Pointer),
-  Location = Pointer, !;
-  location_pointer(Game, List, Pointer),
-  maplist(unfold_location_pointer(Game), Location, List), !.
-unfold_location_pointer(Game, Location, Pointers) :-
-  maplist(unfold_location_pointer(Game), Location, Pointers), !.
-
-/*
  * ####################### MKBSC ##############################
  * These predicates handle expansion of a game to a higher order
  * of knowledge with the MKBSC algorithm.
@@ -52,6 +16,10 @@ unfold_location_pointer(Game, Location, Pointers) :-
  *
  * A good description of the algorithm and its implementation is given 
  * here: https://kth.diva-portal.org/smash/get/diva2:1221520/FULLTEXT01.pdf
+ *
+ * An important optimization is to not copy the names when creating the locations
+ * in the expanded games, and instead store them with 'location pointers' (see
+ * location_pointer.pl). Otherwise the name of each location would grow exponentially.
  * */
 
 

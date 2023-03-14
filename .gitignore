@@ -1,3 +1,9 @@
 # dont save cached expansions in git
 games/cache/*
 !games/cache/README.md
+# dont save images
+images/*
+!/README.md
+!/wagon_game_K0.png
+!/wagon_game_K2.png
+!/wagon_game_K3.png

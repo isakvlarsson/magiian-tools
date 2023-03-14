@@ -44,7 +44,7 @@ equal(sam, [middle, right]).
 Internaly the games are represented a little differently. The above game would
 look like this when viewed.
 
-![wagon game](./game.png)
+![image of the wagon game](./images/wagon_game_K0.png)
 
 ## dependencies
 
@@ -63,6 +63,47 @@ look like this when viewed.
 * View a game with `view_game/2`. For example `?- view_game(wagon_game, 0)` to view
   the original version of that game, or `?- view_game(wagon_game, 2)` to view that
   game expanded 2 times with mkbsc. (I have only tested this on linux).
+* There is a better way to view larger expansions of a game with `view_game/3`.
+  For example `view_game(wagon_game, 3, 1)` to view the third expansion of that
+  game and only show the names of the locations that first occur in the original
+  or first expansion of the game.
 * Export an image of a game with `export_game/2`. This works the same as
   `view_game/2` but instead of opening a window with a picure of that game, an
-  image is created.
+  image is created. The images are placed in the `images` directory.
+* One can also export the 'fancier' version of a game with `export_game/3`
+  (works the same as `view_game/3`).
+
+## visualizing games
+
+Here are some examples of visualizations of games using different settings.
+Before trying these commands, make sure to run the following to load and expand
+the game.
+
+```prolog
+?- load_game(wagon_game).
+  true
+?- create_expanded_game(wagon_game, 10).
+```
+
+To view the original game type
+```prolog
+?- view_game(wagon_game, 0).
+```
+![the original game](./images/wagon_game_K0.png)
+
+To view an expanded (here we view the second expansion) version of a game with
+the default viewing settings. Notice how long the names of the nodes get.
+```prolog
+?- view_game(wagon_game, 2).
+```
+![wagon game expanded, default settings](./images/wagon_game_K2.png)
+
+To view an expanded version of a game in a more user friendly way, try this.
+Here we supply a **cutoff** so that nodes that occur for the first time after
+this expansion are named after the expansion that they occur in for the first
+time instead. These graphs are a little easier to grasp. For large expansions
+they might still take a long time to load.
+```prolog
+?- view_game(wagon_game, 3, 1).
+```
+![wagon game expanded, fancy settings](./images/wagom_game_K3.png)

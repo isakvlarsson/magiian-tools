@@ -44,6 +44,7 @@ load_game(Game) :-
 process_gameterm(Game, Term) :-
   (
     Term = agents(Agents) -> 
+    assert_gamefact_once(Game, Term),
     forall(
       member(Agent, Agents),
       assert_gamefact_once(Game, agent(Agent))
