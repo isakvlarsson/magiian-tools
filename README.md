@@ -106,4 +106,4 @@ they might still take a long time to load.
 ```prolog
 ?- view_game(wagon_game, 3, 1).
 ```
-![wagon game expanded, fancy settings](./images/wagom_game_K3.png)
+![wagon game expanded, fancy settings](./images/wagon_game_K3.png)
