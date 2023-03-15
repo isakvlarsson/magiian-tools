@@ -34,6 +34,16 @@ unfold_location_pointer(Game, Location, Pointer) :-
 unfold_location_pointer(Game, Location, Pointers) :-
   maplist(unfold_location_pointer(Game), Location, Pointers), !.
 
+%% Gives the actual location that this knowledge-state
+% corresponds to. This is just the location that is in
+% all 'parts' of the knowledgestate, all the way down.
+actual_location(Game, Location, Location) :-
+  \+location_pointer(Game, _, Location), !.
+actual_location(Game, LocationPointer, Actual) :-
+  location_pointer(Game, Location, LocationPointer),
+  intersection_all(Location, [I]),
+  actual_location(Game, I, Actual).
+  
 
 %% finds out if a locations is 'new' in this expansion
 % of the game or if it existed in the previous expansion.
@@ -81,3 +91,5 @@ first_location_name(Game, Expansion, Location, Name) :-
   intersection_all(List, [IsomorphicLocation]),
   first_location_name(Game, PreviousExpansion, IsomorphicLocation, Name).
  
+
+

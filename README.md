@@ -66,7 +66,9 @@ look like this when viewed.
 * There is a better way to view larger expansions of a game with `view_game/3`.
   For example `view_game(wagon_game, 3, 1)` to view the third expansion of that
   game and only show the names of the locations that first occur in the original
-  or first expansion of the game.
+  or first expansion of the game. One can also supply the term `actual` as the
+  third parameter and get the names of the actual locations that the
+  knowledge-states correspond to.
 * Export an image of a game with `export_game/2`. This works the same as
   `view_game/2` but instead of opening a window with a picure of that game, an
   image is created. The images are placed in the `images` directory.
@@ -107,3 +109,10 @@ they might still take a long time to load.
 ?- view_game(wagon_game, 3, 1).
 ```
 ![wagon game expanded, fancy settings](./images/wagon_game_K3.png)
+
+To view an expanded version of a game but with the locaitons named after
+the actual nodes they correspond with in the original game, do this.
+```prolog
+?- view_game(wagon_game, 4, actual).
+```
+![wagon game expanded, actual name of nodes](./images/wagon_game_K4.png)

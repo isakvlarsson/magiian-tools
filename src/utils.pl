@@ -34,3 +34,20 @@ same([H|T]) :-
 same([], _).
 same([H|T], H) :-
   same(T, H).
+
+
+%% finds the elements that are in all the lists (and sublists) of a list
+% I assume that lists and non-list-elements wont be mixed inside a single list
+nested_intersection(NestedList, Intersection) :-
+  flatten(NestedList, Elements),
+  nested_intersection(NestedList, Elements, Intersection).
+
+nested_intersection([H|T], Acc, I) :-
+  \+is_list(H),
+  intersection([H|T], Acc, I).
+nested_intersection([], _, _).
+nested_intersection([H|T], Acc, I) :-
+  is_list(H),
+  nested_intersection(H, Acc, InnerAcc1),
+  nested_intersection(T, InnerAcc1, InnerAcc2),
+  intersection(InnerAcc1, InnerAcc2, I), !.
