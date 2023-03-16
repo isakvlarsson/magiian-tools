@@ -25,7 +25,7 @@ strategy_transitions_to_dot(Out, Game, Expansion, Strategy) :-
   forall(
     game(Game, Expansion, location(From)),
     (
-      memberchk(From-ActionProfile, Strategy), 
+      get_assoc(From, Strategy, ActionProfile),
       forall(
         game(Game, Expansion, transition(From, ActionProfile, To)),
         (

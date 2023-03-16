@@ -1,29 +1,45 @@
-play_round(Game, Expansion, Strategy, Location, Next) :-
-  % search for the action
-  member(Location-Action, Strategy), 
-  %take the action
-  game(Game, Expansion, transition(Location, Action, Next)).
+%% Takes a stap in the game
+% based on a memoryless strategy
+% Visited is an assoc
+step(_, _, _, Visited, Location, goto(Location)) :-
+  % We have been here before
+  get_assoc(Location, Visited, true), !.
+step(Game, Expansion, Strategy, _, Location, fork(Nexts)) :-
+  % multiple transitions, non-determinism
+  % I call this a fork
+  get_assoc(Location, Strategy, ActionProfile),
+  findall(N, game(Game, Expansion, transition(Location, ActionProfile, N)), Nexts),
+  length(Nexts, Len), 
+  Len > 1, !.
+step(Game, Expansion, Strategy, _, Location, Next) :-
+  get_assoc(Location, Strategy, ActionProfile),
+  game(Game, Expansion, transition(Location, ActionProfile, Next)), !.
 
-play(Game, Expansion, Strategy, Location, History, Outcome) :-
-  play_round(Game, Expansion, Strategy, Location, Next),
-  \+memberchk(Next, History),
-  play(Game, Expansion, Strategy, Next, [Location|History], Outcome).
-play(_, _, _, _, O, O).
+%% a play of a game
+% represented in i finite way
+play(Game, Expansion, Strategy, Visited, Location, History, [goto(LoopStart)|History]) :-
+  % we came back to the start of a loop
+  step(Game, Expansion, Strategy, Visited, Location, goto(LoopStart)), !.
+play(Game, Expansion, Strategy, Visited, Location, History, [fork(Forks)|History]) :-
+  % there is non-determinism, start multiple new plays from here
+  step(Game, Expansion, Strategy, Visited, Location, fork(Nexts)),
+  list_to_assoc([Location-true], NewVisited),
+  maplist(outcome_from(Game, Expansion, Strategy, NewVisited, [Location]), Nexts, Forks), !.
+play(Game, Expansion, Strategy, Visited, Location, History, Outcome) :-
+    % this is just a normal step, kepp playing
+    step(Game, Expansion, Strategy, Visited, Location, Next),
+    put_assoc(Location, Visited, true, NewVisited),
+    play(Game, Expansion, Strategy, NewVisited, Next, [Location|History], Outcome), !.
+    
 
 %% Generate the outcome of a strategy on a game
 % with the locations from the original game
 outcome(Game, Expansion, Strategy, Outcome) :-
   game(Game, Expansion, initial(Initial)),
-  play(Game, Expansion, Strategy, Initial, [], O),
+  empty_assoc(Visited),
+  outcome_from(Game, Expansion, Strategy, Visited, [], Initial, Outcome).
+outcome_from(Game, Expansion, Strategy, Visited, History, Location, Outcome) :-
+  % this version is also used as a helper in `play/7`
+  play(Game, Expansion, Strategy, Visited, Location, History, O),
   reverse(O, Outcome).
   
-
-%% is the location the start of a cycle?
-is_cycle_start(Game, Expansion, Strategy, Location) :-
-
-
-%% Is this a 'fork'?
-% (Does this location have multiple
-% transitions with respect to the action
-% taken in the strategy)
-is_fork(Game, Expansion, Strategy, Location).

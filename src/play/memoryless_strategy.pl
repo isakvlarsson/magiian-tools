@@ -1,12 +1,15 @@
 /*
  * ####################### memoryless strategy ###########################
- * A memoryless strategy is a mapping from observations to actions
- * We use the pair construct in prolog for this. It is weird but works.
- * The memoryless strategy is represented with a list pairs for between
- * locations and action profiles.
+ * A memoryless strategy is a mapping from observations to actions for each
+ * agent. This means that the agent must take the same action in every location
+ * that is in the same observation. For the individual agent's strategies we 
+ * represent a strategy as a list of pairs between observations and actions.
  *
- * For the individual agent's strategies we represent a strategy as a
- * list of pairs between observations and actions
+ * A strategy for the 'whole' multi-agent game is a mapping between
+ * locations and actionprofiles. We use the association list from the
+ * swipl standard library to represent the strategies int the multi-agent
+ * game to make querying fast.
+ * (https://eu.swi-prolog.org/pldoc/man?section=assoc)
  * */
 
 % finds a strategy profile for all locations in the game
@@ -15,7 +18,8 @@ memoryless_strategy(Game, Expansion, Strategy) :-
   maplist(agent_memoryless_strategy(Game, Expansion), Agents, AgentStrategies),
   findall(Location, game(Game, Expansion, location(Location)), Locations),
   maplist(location_action_profile(Game, Expansion, AgentStrategies), Locations, ActionProfiles),
-  zip_pair(Locations, ActionProfiles, Strategy).
+  zip_pair(Locations, ActionProfiles, KeyVals), 
+  list_to_assoc(KeyVals, Strategy).
 
   
   
