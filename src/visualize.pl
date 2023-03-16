@@ -1,3 +1,3 @@
-:- [visualize/standard].
-:- [visualize/fancy].
-:- [visualize/actual].
+:- [visualize/game].
+:- [visualize/memoryless_strategy].
+:- [visualize/location].

@@ -6,32 +6,27 @@
 
 %% view a game 
 view_game(Game, Expansion) :-
+  view_game(Game, Expansion, standard).
+view_game(Game, Expansion, Mode) :-
   gv_view(
-    {Game, Expansion}/[Out0]>>game_to_dot(Out0, Game, Expansion),
+    {Game, Expansion, Mode}/[Out]>>game_to_dot(Out, Game, Expansion, Mode),
     [directed(true), method(dot)]
   ).
 
 export_game(Game, Expansion) :-
+  export_game(Game, Expansion, standard).
+export_game(Game, Expansion, Mode) :-
   format(atom(Filename), 'images/~a_K~a.png', [Game, Expansion]),
   gv_export(
     Filename,
-    {Game, Expansion}/[Out0]>>game_to_dot(Out0, Game, Expansion),
+    {Game, Expansion, Mode}/[Out]>>game_to_dot(Out, Game, Expansion, Mode),
     [directed(true), method(dot)]
   ).
 
-game_to_dot(Out, Game, Expansion) :-
-  locations_to_dot(Out, Game, Expansion),
+game_to_dot(Out, Game, Expansion, Mode) :-
+  locations_to_dot(Out, Game, Expansion, Mode),
   transitions_to_dot(Out, Game, Expansion),
   observations_to_dot(Out, Game, Expansion).
-
-locations_to_dot(Out, Game, Expansion) :-
-  forall(
-    game(Game, Expansion, location(Location)), 
-    (
-      unfold_location_pointer(Game, Name, Location),
-      dot_node_id(Out, Location, [label(Name)])
-    )
-  ).
 
 transitions_to_dot(Out, Game, Expansion) :-
   forall(game(Game, Expansion, location(From)), (

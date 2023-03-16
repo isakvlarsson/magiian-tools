@@ -1,6 +1,8 @@
 /*
  * ################### General helpers ########################
  * Hera are a collection of helpers that are more generall
+ *
+ * Not all of these are used.
  * */
 
 
@@ -51,3 +53,13 @@ nested_intersection([H|T], Acc, I) :-
   nested_intersection(H, Acc, InnerAcc1),
   nested_intersection(T, InnerAcc1, InnerAcc2),
   intersection(InnerAcc1, InnerAcc2, I), !.
+
+
+%% pair two lists (of the same length)
+% into a list of pairs
+zip_pair(L1, L2, Pairs):-
+  zip_pair(L1, L2, [], P),
+  reverse(P, Pairs).
+zip_pair([], [], Pairs, Pairs).
+zip_pair([H1|T1], [H2|T2], Acc, Pairs) :-
+  zip_pair(T1, T2, [H1-H2|Acc], Pairs).

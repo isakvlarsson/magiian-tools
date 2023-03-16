@@ -39,6 +39,11 @@ load_game(Game) :-
   assertz(loaded(Game, 0)),
   seen.
 
+%% loads a game and creates the expansion
+load_game(Game, Expansion) :-
+  load_game(Game),
+  create_expanded_game(Game, Expansion).
+
 %% helper for the load_gam/1
 % to parse the input
 process_gameterm(Game, Term) :-
