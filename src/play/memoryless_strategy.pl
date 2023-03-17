@@ -12,7 +12,7 @@
  * (https://eu.swi-prolog.org/pldoc/man?section=assoc)
  * */
 
-% finds a strategy profile for all locations in the game
+%% finds a strategy profile for all locations in the game
 memoryless_strategy(Game, Expansion, Strategy) :-
   game(Game, agents(Agents)),
   maplist(agent_memoryless_strategy(Game, Expansion), Agents, AgentStrategies),
