@@ -1,3 +1,24 @@
+:- module(memoryless_outcome, [
+  outcome/4
+]).
+
+:- use_module('strategy').
+% ####################### Outcome ##################################
+%% Generate the outcome of a strategy on a game
+% with the locations from the original game
+outcome(Game, Expansion, Strategy, Outcome) :-
+  game(Game, Expansion, initial(Initial)),
+  empty_assoc(Visited),
+  outcome_from(Game, Expansion, Strategy, Visited, [], Initial, Outcome).
+outcome_from(Game, Expansion, Strategy, Visited, History, Location, Outcome) :-
+  % this version is also used as a helper in `play/7`
+  play(Game, Expansion, Strategy, Visited, Location, History, O),
+  parse_history(O, Parsed),
+  reverse(Parsed, Reversed),
+  to_actual_locations(Game, Reversed, Outcome).
+
+
+%% ############################## Helpers ###############################
 %% Takes a stap in the game
 % based on a memoryless strategy
 % Visited is an assoc
@@ -7,12 +28,12 @@ step(_, _, _, Visited, Location, goto(Location)) :-
 step(Game, Expansion, Strategy, _, Location, fork(Nexts)) :-
   % multiple transitions, non-determinism
   % I call this a fork
-  get_assoc(Location, Strategy, ActionProfile),
+  get_memoryless_strategy(Location, Strategy, ActionProfile),
   findall(N, game(Game, Expansion, transition(Location, ActionProfile, N)), Nexts),
   length(Nexts, Len), 
   Len > 1, !.
 step(Game, Expansion, Strategy, _, Location, Next) :-
-  get_assoc(Location, Strategy, ActionProfile),
+  get_memoryless_strategy(Location, Strategy, ActionProfile),
   game(Game, Expansion, transition(Location, ActionProfile, Next)), !.
 
 %% a play of a game
@@ -32,19 +53,6 @@ play(Game, Expansion, Strategy, Visited, Location, History, Outcome) :-
     play(Game, Expansion, Strategy, NewVisited, Next, [Location|History], Outcome), !.
     
 
-%% Generate the outcome of a strategy on a game
-% with the locations from the original game
-outcome(Game, Expansion, Strategy, Outcome) :-
-  game(Game, Expansion, initial(Initial)),
-  empty_assoc(Visited),
-  outcome_from(Game, Expansion, Strategy, Visited, [], Initial, Outcome).
-outcome_from(Game, Expansion, Strategy, Visited, History, Location, Outcome) :-
-  % this version is also used as a helper in `play/7`
-  play(Game, Expansion, Strategy, Visited, Location, History, O),
-  parse_history(O, Parsed),
-  reverse(Parsed, Reversed),
-  to_actual_locations(Game, Reversed, Outcome).
-  
 
 %% this converts the history to a
 % better format. `goto`s are replaced

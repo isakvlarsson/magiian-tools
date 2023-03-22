@@ -1,3 +1,9 @@
+:- module(synchronous_product, [
+  create_expanded_game/2,
+  unload_expanded_game/2
+]).
+:- use_module('../parse').
+
 /*
  * ####################### MKBSC ##############################
  * These predicates handle expansion of a game to a higher order
@@ -65,6 +71,17 @@ transitions_in_expansion_from(Game, Expansion, JointKnowledge, T) :-
   ),
   flatten(Transitions, T).
 
+%% get the transitions from a location in an expanded game
+transitions_in_expansion_from(Game, Expansion, JointKnowledge, Transitions) :-
+  setofall(
+    T,
+    (
+      game(Game, agents(Agents)),
+      maplist(projection_expansion(Game, Expansion), Agents, JointKnowledge, K)
+    ),
+    Transitions
+  ).
+
 % this is a helper to allow us to work with this predicate with maplist
 projection_expansion(Game, Expansion, Agent, S1, Action, S2) :-
   projection_expansion(Game, Expansion, Agent, transition(S1, Action, S2)).
@@ -72,9 +89,7 @@ projection_expansion(Game, Expansion, Agent, S1, Action, S2) :-
 
 
 %% The synchronous product combines single-agent games into a multi-agent game
-% by essentially playing them concurently and only saving the transitions that
-% make sense from the multi-agent perspective (the agents should have overlapping
-% knowledge etc.)
+% by playing them concurently
 synchronous_product(Game, Expansion) :-
   NextExpansion is Expansion + 1,
   % add the initial state

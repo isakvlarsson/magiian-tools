@@ -1,5 +1,15 @@
+:- module(kbsc, [
+  create_projection/3,
+  create_projection_expansion/3,
+  unload_projection_expansion/3,
+  projection/4,
+  projection_expansion/4
+]).
 :- dynamic projection/4.
 :- dynamic projection_expansion/4.
+
+:- use_module('../parse').
+:- use_module('../../utils').
 /*
  * ########################## KBSC ######################
  * these predicates handle projeciton of a multi-agent game

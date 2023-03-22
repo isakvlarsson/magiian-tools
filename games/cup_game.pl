@@ -17,5 +17,7 @@ transition(good, [squeeze, lift], lose).
 
 transition(win, [lift, lift], win).
 
+transition(lose, [lift, lift], lose).
+
 equal(p2, [bad, good]).
 

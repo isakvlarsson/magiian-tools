@@ -1,3 +1,12 @@
+:- module(parse, [
+  load_game/1,
+  load_game/2,
+  unload_game/1,
+  agent_index/3,
+  game/2,
+  game/3,
+  joint_action/2
+]).
 :- use_module(library(term_ext)).
 :- dynamic game/3.
 /*

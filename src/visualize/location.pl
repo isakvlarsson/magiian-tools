@@ -1,3 +1,9 @@
+:- module(visualize_location, [
+  locations_to_dot/4
+]).
+
+:- use_module(library(gv)).
+
 locations_to_dot(Out, Game, Expansion, Mode) :-
   (
     Mode = standard ->

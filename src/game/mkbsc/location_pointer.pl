@@ -1,3 +1,13 @@
+:- module(location_pointer, [
+  create_location_pointer/3,
+  unfold_location_pointer/3,
+  location_born/4,
+  first_location_name/4,
+  actual_location/3,
+  location_pointer/3
+]).
+
+:- use_module(library(term_ext)).
 /*
  * ############# Location pointers #########################
  * */
@@ -34,36 +44,6 @@ unfold_location_pointer(Game, Location, Pointer) :-
 unfold_location_pointer(Game, Location, Pointers) :-
   maplist(unfold_location_pointer(Game), Location, Pointers), !.
 
-%% Gives the actual location that this knowledge-state
-% corresponds to. This is just the location that is in
-% all 'parts' of the knowledgestate, all the way down.
-actual_location(Game, Location, Location) :-
-  \+location_pointer(Game, _, Location), !.
-actual_location(Game, LocationPointer, Actual) :-
-  location_pointer(Game, Location, LocationPointer),
-  intersection_all(Location, [I]),
-  actual_location(Game, I, Actual).
-  
-
-%% finds out if a locations is 'new' in this expansion
-% of the game or if it existed in the previous expansion.
-% We say that it existed if the JointKnowledge of the locaiton
-% consists of observations that all agents have access to in the
-% previous version
-location_is_new(Game, 0, L) :-
-  game(Game, 0, location(L)), !.
-location_is_new(Game, Expansion, LP) :-
-  game(Game, Expansion, location(LP)),
-  location_pointer(Game, L, LP),
-  game(Game, agents(Agents)),
-  PreviousExpansion is Expansion - 1,
-  \+maplist(agent_has_observation(Game, PreviousExpansion), Agents, L).
-
-% helper to the above predicate
-agent_has_observation(Game, Expansion, Agent, Observation) :-
-  game(Game, Expansion, O), O = observation(Agent, Observation), !.
-
-
 %% associates a number to each location related to
 % in which expansion that location was 'created'.
 location_born(Game, Expansion, Location, Expansion) :-
@@ -91,5 +71,38 @@ first_location_name(Game, Expansion, Location, Name) :-
   intersection_all(List, [IsomorphicLocation]),
   first_location_name(Game, PreviousExpansion, IsomorphicLocation, Name).
  
+
+
+%% Gives the actual location that this knowledge-state
+% corresponds to. This is just the location that is in
+% all 'parts' of the knowledgestate, all the way down.
+actual_location(Game, Location, Location) :-
+  \+location_pointer(Game, _, Location), !.
+actual_location(Game, LocationPointer, Actual) :-
+  location_pointer(Game, Location, LocationPointer),
+  intersection_all(Location, [I]),
+  actual_location(Game, I, Actual).
+  
+
+% ################# helpers #################
+
+%% finds out if a locations is 'new' in this expansion
+% of the game or if it existed in the previous expansion.
+% We say that it existed if the JointKnowledge of the locaiton
+% consists of observations that all agents have access to in the
+% previous version
+location_is_new(Game, 0, L) :-
+  game(Game, 0, location(L)), !.
+location_is_new(Game, Expansion, LP) :-
+  game(Game, Expansion, location(LP)),
+  location_pointer(Game, L, LP),
+  game(Game, agents(Agents)),
+  PreviousExpansion is Expansion - 1,
+  \+maplist(agent_has_observation(Game, PreviousExpansion), Agents, L).
+
+% helper to the above predicate
+agent_has_observation(Game, Expansion, Agent, Observation) :-
+  game(Game, Expansion, O), O = observation(Agent, Observation), !.
+
 
 

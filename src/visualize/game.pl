@@ -1,3 +1,10 @@
+:- module(visualize_game, [
+  view_game/2,
+  view_game/3,
+  export_game/2,
+  export_game/3,
+  observations_to_dot/3
+]).
 :- use_module(library(gv)).
 %% ascii_id gives a unique id to a ascii string
 % this id is used as the id for the node by the
