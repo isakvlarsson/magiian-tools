@@ -66,9 +66,3 @@ split_path([H|T], H, T).
 dot_id(Id) :-
   uuid(X),
   ascii_id(X, Id).
-
-outcome_node_id(Out, Id, L) :-
-  format(Out, '~w [label="~w"]', [Id, L]).
-
-outcome_edge_id(Out, From, To) :-
-  format(Out, '~w -> ~w;\n', [From, To]).

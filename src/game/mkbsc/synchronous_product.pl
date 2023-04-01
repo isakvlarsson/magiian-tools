@@ -3,9 +3,10 @@
   unload_expanded_game/2
 ]).
 :- use_module('../parse').
+:- use_module(kbsc).
+:- use_module(location_pointer).
 
-/*
- * ####################### MKBSC ##############################
+/* ####################### MKBSC ##############################
  * These predicates handle expansion of a game to a higher order
  * of knowledge with the MKBSC algorithm.
  *
@@ -29,63 +30,22 @@
  * */
 
 
-%% the post function for a multi-agent game
-% it gives all locations that can be reached
-% by takin a JointAction in a list of locations
-post(Game, Expansion, S1, JointAction, S2) :-
-  setofall(
-    S2member,
-    (
-      member(S1member, S1),
-      game(Game, Expansion, transition(S1member, JointAction, S2member))
-    ),
-    S2
-  ).
-
-
-%% generates the transitions in a game that goes out from
-% a knowledge-state
-transitions_in_expansion_from(Game, Expansion, JointKnowledge, T) :-
-  % we first generate all possible transitions
-  intersection_all(JointKnowledge, CommonKnowledge),
-  setofall(
-    ActionTransitions,
-    (
-      % we want to do this for all actions (that exist in the game)
-      joint_action(Game, JointAction),
-      % generete s
-      post(Game, Expansion, CommonKnowledge, JointAction, S), S \== [],
-      % generate s_i for all agents
-      findall(Agent, game(Game, agent(Agent)), Agents),
-      findall(
-        transition(JointKnowledge, JointAction, K),
-        (
-          maplist(projection_expansion(Game, Expansion), Agents, JointKnowledge, JointAction, K),
-          maplist(intersection(S), K, I),
-          \+intersection_all(I, [])
-        ),
-        ActionTransitions
-      )
-    ),
-    Transitions
-  ),
-  flatten(Transitions, T).
-
 %% get the transitions from a location in an expanded game
 transitions_in_expansion_from(Game, Expansion, JointKnowledge, Transitions) :-
   setofall(
-    T,
+    transition(JointKnowledge, Act, K),
     (
       game(Game, agents(Agents)),
-      maplist(projection_expansion(Game, Expansion), Agents, JointKnowledge, K)
+      maplist(projection(Game, Expansion), Agents, JointKnowledge, Act, K),
+      \+intersection_all(K, [])
     ),
     Transitions
   ).
 
-% this is a helper to allow us to work with this predicate with maplist
-projection_expansion(Game, Expansion, Agent, S1, Action, S2) :-
-  projection_expansion(Game, Expansion, Agent, transition(S1, Action, S2)).
 
+% this is a helper to allow us to work with this predicate with maplist
+projection(Game, Expansion, Agent, S1, Action, S2) :-
+  projection(Game, Expansion, Agent, 1, transition(S1, Action, S2)).
 
 
 %% The synchronous product combines single-agent games into a multi-agent game
@@ -93,7 +53,7 @@ projection_expansion(Game, Expansion, Agent, S1, Action, S2) :-
 synchronous_product(Game, Expansion) :-
   NextExpansion is Expansion + 1,
   % add the initial state
-  findall(I, projection_expansion(Game, Expansion, _, initial(I)), Initial),
+  findall(I, projection(Game, Expansion, _, 1, initial(I)), Initial),
   create_location_pointer(Game, Initial, InitialPointer),
   assertz(game(Game, NextExpansion, initial(InitialPointer))),
   assertz(game(Game, NextExpansion, location(InitialPointer))),
@@ -168,7 +128,7 @@ create_expanded_game(Game, Expansion) :-
     game(Game, agent(Agent)),
     (
       create_projection(Game, PreviousExpansion, Agent),
-      create_projection_expansion(Game, PreviousExpansion, Agent)
+      create_expanded_projection(Game, PreviousExpansion, Agent)
     )
   ),
   synchronous_product(Game, PreviousExpansion),

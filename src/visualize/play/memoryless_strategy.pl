@@ -80,7 +80,5 @@ transitions_to_dot(Out, Game, Expansion, Strategy) :-
     )
   ).
 
-strategy_edge_id(Out, FromId, ToId, Act) :-
-  format(Out, '~a -> ~a [color="red", label="~w"];\n', [FromId, ToId, Act]).
 
 

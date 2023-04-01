@@ -2,14 +2,16 @@
   view_game/2,
   view_game/3,
   export_game/2,
-  export_game/3,
-  observations_to_dot/3
+  export_game/3
 ]).
 :- use_module(library(gv)).
 %% ascii_id gives a unique id to a ascii string
 % this id is used as the id for the node by the
 % gv library!
 :- use_module(library(term_ext)).
+:- use_module(location).
+:- use_module(observation).
+:- use_module(dot).
 
 %% view a game 
 view_game(Game, Expansion) :-
@@ -49,50 +51,3 @@ transitions_to_dot(Out, Game, Expansion) :-
     )
   )
 ).
-
-observations_to_dot(Out, Game, Expansion) :-
-  forall(
-    game(Game, agent(Agent)),
-    (
-      forall(
-        game(Game, Expansion, observation(Agent, Observation)),
-        equivalence_relation_to_dot(Out, Game, Agent, Observation)
-      )
-    )
-  ).
-
-
-%% writes a dot_observation_arc between all members 
-% of the observation
-equivalence_relation_to_dot(Out, _, _, []) :-
-  format(Out, '', []).
-equivalence_relation_to_dot(Out, Game, Agent, [H|T]) :-
-  forall(
-    member(Obs, T),
-    dot_observation_arc_id(Out, Game, H, Obs, Agent)
-  ),
-  equivalence_relation_to_dot(Out, Game, Agent, T).
-
-
-
-%% Output an observation relation between two nodes
-% to the dot stream
-dot_observation_arc(Out, Game, From, To, Agent) :-
-  ascii_id(From, FromId),
-  ascii_id(To, ToId),
-  agent_color(Game, Agent, Color),
-  format(Out, '~a -> ~a [color="~a", dir="none", style="dashed", label="~~ ~a"];\n', [FromId, ToId, Color, Agent]).
-
-
-%% same as dot observation_arc/5 but one supplies their
-% own ids for the nodes involved
-dot_observation_arc_id(Out, Game, FromId, ToId, Agent) :-
-  agent_color(Game, Agent, Color),
-  format(Out, '~a -> ~a [color="~a", dir="none", style="dashed", label="~~ ~a"];\n', [FromId, ToId, Color, Agent]).
-
-%% specifies the color of the agent's observations
-agents_colors(['red', 'blue', 'green']).
-agent_color(Game, Agent, Color) :-
-  agent_index(Game, Agent, Index),
-  agents_colors(Colors),
-  nth0(Index, Colors, Color).

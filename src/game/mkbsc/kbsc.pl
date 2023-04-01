@@ -1,12 +1,10 @@
 :- module(kbsc, [
   create_projection/3,
-  create_projection_expansion/3,
-  unload_projection_expansion/3,
-  projection/4,
-  projection_expansion/4
+  create_expanded_projection/3,
+  unload_expanded_projection/3,
+  projection/5
 ]).
-:- dynamic projection/4.
-:- dynamic projection_expansion/4.
+:- dynamic projection/5.
 
 :- use_module('../parse').
 :- use_module('../../utils').
@@ -22,31 +20,40 @@
  * */
 
 %% create the projection of the game of an agent
-create_projection(Game, Expansion, Agent) :-
-  unload_projection(Game, Expansion, Agent),
-  agent_index(Game, Agent, Index),
+create_projection(G, K, Agt) :-
+  unload_projection(G, K, Agt),
+  agent_index(G, Agt, Index),
   forall(
-    game(Game, Expansion, transition(From, JointAction, To)),
+    game(G, K, transition(From, JointAction, To)),
     (
       nth0(Index, JointAction, Action),
-      assertz(projection(Game, Expansion, Agent, transition(From, Action, To)))
+      assertz(projection(G, K, Agt, 0, transition(From, Action, To)))
     )
   ).
 
-unload_projection(Game, Expansion, Agent) :-
-  retractall(projection(Game, Expansion, Agent, _)), !;
+% a projection reuses everything from the original game
+% except the transitions
+projection(G, K, Agt, 0, initial(I)) :-
+  game(G, K, initial(I)).
+projection(G, K, Agt, 0, location(L)) :-
+  game(G, K, location(L)).
+projection(G, K, Agt, 0, observation(Obs)) :-
+  game(G, K, observation(Agt, Obs)).
+
+unload_projection(G, K, Agt) :-
+  retractall(projection(G, K, Agt, _)), !;
   true.
 
 
 %% the post function
 % used to get all locations S2 that are reachable
 % from the locations S1 when taking an action Action
-post(Game, Expansion, Agent, S1, Action, S2) :-
+post(G, K, Agt, S1, Action, S2) :-
   setofall(
     S2member,
     (
       member(S1member, S1),
-      projection(Game, Expansion, Agent, transition(S1member, Action, S2member))
+      projection(G, K, Agt, 0, transition(S1member, Action, S2member))
     ),
     S2
   ).
@@ -54,37 +61,41 @@ post(Game, Expansion, Agent, S1, Action, S2) :-
 %% finds a set of transitions in the expanded game
 % that goes out from the location Si
 % this is a useful helper when implementing kbsc
-expanded_neighbor_transitions(Game, Expansion, Agent, Si, Transitions) :-
+expanded_transitions(G, K, Agt, Si, Transitions) :-
   setofall(
     transition(Si, Action, Intersection),
     (
-      game(Game, action(Action)),
-      post(Game, Expansion, Agent, Si, Action, Sj),
-      game(Game, Expansion, observation(Agent, Observation)),
+      game(G, action(Action)),
+      post(G, K, Agt, Si, Action, Sj),
+      game(G, K, observation(Agt, Observation)),
       intersection(Sj, Observation, Intersection),
       Intersection \== []
     ),
     Transitions
   ).
 
-%% all transitions of the new game will be located in Transitions
-create_projection_expansion(Game, Expansion, Agent) :-
-  unload_projection_expansion(Game, Expansion, Agent),
-  game(Game, Expansion, initial(Initial)),
+%% Create the expanded single-agent game
+% with KBSC, unlike the multi-agent case
+% this expansion does not have any 
+% uncertainity (the observations are
+% all singletons)
+create_expanded_projection(G, K, Agt) :-
+  unload_expanded_projection(G, K, Agt),
+  game(G, K, initial(Initial)),
   % save the initial cell
-  assertz(projection_expansion(Game, Expansion, Agent, initial([Initial]))),
-  assertz(projection_expansion(Game, Expansion, Agent, location([Initial]))),
-  create_projection_expansion(Game, Expansion, Agent, [[Initial]]).
+  assertz(projection(G, K, Agt, 1, initial([Initial]))),
+  assertz(projection(G, K, Agt, 1, location([Initial]))),
+  create_expanded_projection(G, K, Agt, [[Initial]]).
 
-create_projection_expansion(_, _, _, []) :- !.
-create_projection_expansion(Game, Expansion, Agent, [Si|Queue]) :-
+create_expanded_projection(_, _, _, []) :- !.
+create_expanded_projection(G, K, Agt, [Si|Queue]) :-
   % take the transitions that go out from this observation
-  expanded_neighbor_transitions(Game, Expansion, Agent, Si, NT),
+  expanded_transitions(G, K, Agt, Si, NT),
   % save the transitions
   forall(
     member(T, NT),
     (
-      assertz(projection_expansion(Game, Expansion, Agent, T))
+      assertz(projection(G, K, Agt, 1, T))
     )
   ),
   % take the cells in NT that we have not visited yet
@@ -92,7 +103,7 @@ create_projection_expansion(Game, Expansion, Agent, [Si|Queue]) :-
     S,
     (
       member(transition(_, _, S), NT),
-      \+projection_expansion(Game, Expansion, Agent, transition(S, _, _)),
+      \+projection(G, K, Agt, 1, transition(S, _, _)),
       \+memberchk(S, [Si|Queue])
     ),
     Ss
@@ -100,14 +111,14 @@ create_projection_expansion(Game, Expansion, Agent, [Si|Queue]) :-
   % save those cells
   forall(
     member(Sj, Ss),
-    assertz(projection_expansion(Game, Expansion, Agent, location(Sj)))
+    assertz(projection(G, K, Agt, 1, location(Sj)))
   ),
   % recurse for the new locations
   append(Queue, Ss, NewQueue),
-  create_projection_expansion(Game, Expansion, Agent, NewQueue).
+  create_expanded_projection(G, K, Agt, NewQueue).
 
-unload_projection_expansion(Game, Expansion, Agent) :-
-  retractall(projection_expansion(Game, Expansion, Agent, _)), !;
+unload_expanded_projection(G, K, Agt) :-
+  retractall(projection(G, K, Agt, 1, _)), !;
   true.
 
 

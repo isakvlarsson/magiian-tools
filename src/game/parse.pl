@@ -29,7 +29,7 @@ load_game(Game) :-
   forall(
     (
       game(Game, agent(Agent)),
-      findall(Obs, game(wagon_game, observation(Agent, Obs)), Obss),
+      findall(Obs, game(Game, observation(Agent, Obs)), Obss),
       flatten(Obss, Partitioning)
     ),
     (

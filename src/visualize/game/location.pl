@@ -1,8 +1,12 @@
 :- module(visualize_location, [
-  locations_to_dot/4
+  locations_to_dot/4,
+  agent_locations_to_dot/6
 ]).
 
 :- use_module(library(gv)).
+:- use_module(dot).
+
+% ############### multi-agent ####################
 
 locations_to_dot(Out, Game, Expansion, Mode) :-
   (
@@ -58,3 +62,23 @@ locations_to_dot_actual(Out, Game, Expansion) :-
       dot_node_id(Out, Location, [label(Name)])
     )
   ).
+
+
+% ############## single-agent / projection ############
+
+agent_locations_to_dot(Out, G, K, Agt, 0, Mode) :-
+  forall(
+    projection(G, K, Agt, 0, location(L)),
+    (
+      unfold_location_pointer(G, Name, L),
+      my_dot_node_id(Out, L, Name)
+    )
+  ),
+  !.
+
+agent_locations_to_dot(Out, G, K, Agt, 1, Mode) :-
+  forall(
+    projection(G, K, Agt, 1, location(L)),
+    my_dot_node(Out, L)
+  ).
+

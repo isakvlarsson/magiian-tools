@@ -1,2 +1,3 @@
 :- module(visualize, []).
-:- reexport([game, location, memoryless_strategy, outcome]).
+
+:- reexport(['game/main', 'play/main']).
