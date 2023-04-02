@@ -5,7 +5,8 @@
 
 :- use_module(library(gv)).
 :- use_module(library(term_ext)).
-:- use_module('../utils').
+:- use_module('../../utils').
+:- use_module('dot').
 
 view_outcome(Outcome) :-
   gv_view(

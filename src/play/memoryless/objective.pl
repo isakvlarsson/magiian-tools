@@ -47,7 +47,7 @@ has_buchi_objective(Game, Expansion, Buchi) :-
 % in CoBuchi with this expansion
 has_co_buchi_objective(Game, Expansion, CoBuchi) :-
   findall(L, game(Game, location(L)), Locations),
-  buchi_objective(Game, Expansion, Buchi),
+  has_buchi_objective(Game, Expansion, Buchi),
   subtract(Locations, Buchi, CoBuchi).
 
 % ################# Find objectives and show them ######

@@ -31,21 +31,36 @@
 
 
 %% get the transitions from a location in an expanded game
-transitions_in_expansion_from(Game, Expansion, JointKnowledge, Transitions) :-
+expanded_transitions(Game, Expansion, JointKnowledge, Transitions) :-
+  game(Game, agents(Agents)),
+  intersection_all(JointKnowledge, CommonKnowledge),
   setofall(
-    transition(JointKnowledge, Act, K),
+    transition(JointKnowledge, ActP, K),
     (
-      game(Game, agents(Agents)),
-      maplist(projection(Game, Expansion), Agents, JointKnowledge, Act, K),
-      \+intersection_all(K, [])
+      game(Game, action_profile(ActP)),
+      game_post(Game, Expansion, CommonKnowledge, ActP, S), 
+      maplist(projection(Game, Expansion, 1), Agents, JointKnowledge, ActP, K),
+      %\+intersection(S, K, []),
+      intersection_all(K, KCommon),
+      KCommon \== [],
+      \+intersection(KCommon, S, [])
     ),
     Transitions
   ).
 
+game_post(G, K, S1, Act, S2) :-
+  setofall(
+    S2member,
+    (
+      member(S1member, S1),
+      game(G, K, transition(S1member, Act, S2member))
+    ),
+    S2
+  ).
 
 % this is a helper to allow us to work with this predicate with maplist
-projection(Game, Expansion, Agent, S1, Action, S2) :-
-  projection(Game, Expansion, Agent, 1, transition(S1, Action, S2)).
+projection(Game, Expansion, InnerK, Agent, S1, Action, S2) :-
+  projection(Game, Expansion, Agent, InnerK, transition(S1, Action, S2)).
 
 
 %% The synchronous product combines single-agent games into a multi-agent game
@@ -61,7 +76,7 @@ synchronous_product(Game, Expansion) :-
   
 synchronous_product(_, _, []) :- !.
 synchronous_product(Game, Expansion, [JointKnowledge|Queue]) :-
-  transitions_in_expansion_from(Game, Expansion, JointKnowledge, Transitions),
+  expanded_transitions(Game, Expansion, JointKnowledge, Transitions),
   % add all transitions
   NextExpansion is Expansion + 1,
   forall(

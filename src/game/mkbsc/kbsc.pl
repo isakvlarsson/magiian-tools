@@ -2,6 +2,7 @@
   create_projection/3,
   create_expanded_projection/3,
   unload_expanded_projection/3,
+  projection_post/6,
   projection/5
 ]).
 :- dynamic projection/5.
@@ -33,9 +34,9 @@ create_projection(G, K, Agt) :-
 
 % a projection reuses everything from the original game
 % except the transitions
-projection(G, K, Agt, 0, initial(I)) :-
+projection(G, K, _, 0, initial(I)) :-
   game(G, K, initial(I)).
-projection(G, K, Agt, 0, location(L)) :-
+projection(G, K, _, 0, location(L)) :-
   game(G, K, location(L)).
 projection(G, K, Agt, 0, observation(Obs)) :-
   game(G, K, observation(Agt, Obs)).
@@ -48,12 +49,12 @@ unload_projection(G, K, Agt) :-
 %% the post function
 % used to get all locations S2 that are reachable
 % from the locations S1 when taking an action Action
-post(G, K, Agt, S1, Action, S2) :-
+projection_post(G, K, InnerK, Agt, S1, Action, S2) :-
   setofall(
     S2member,
     (
       member(S1member, S1),
-      projection(G, K, Agt, 0, transition(S1member, Action, S2member))
+      projection(G, K, Agt, InnerK, transition(S1member, Action, S2member))
     ),
     S2
   ).
@@ -66,7 +67,7 @@ expanded_transitions(G, K, Agt, Si, Transitions) :-
     transition(Si, Action, Intersection),
     (
       game(G, action(Action)),
-      post(G, K, Agt, Si, Action, Sj),
+      projection_post(G, K, InnerK, Agt, Si, Action, Sj),
       game(G, K, observation(Agt, Observation)),
       intersection(Sj, Observation, Intersection),
       Intersection \== []

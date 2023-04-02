@@ -74,7 +74,8 @@ process_gameterm(Game, Term) :-
       % add the locations
       assert_gamefact_once(Game, location(From)),
       assert_gamefact_once(Game, location(To)),
-      % add the actions
+      % add the actions individual and actionprofiles
+      assert_gamefact_once(Game, action_profile(JointAction)),
       forall(
         member(Action, JointAction),
         assert_gamefact_once(Game, action(Action))

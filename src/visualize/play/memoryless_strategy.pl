@@ -6,7 +6,8 @@
 ]).
 
 :- use_module(library(gv)).
-:- use_module('game', [observations_to_dot/3]).
+:- use_module('../game/main', [observations_to_dot/3]).
+:- use_module('dot').
 
 view_memoryless_strategy(Game, Expansion, Strategy) :-
   view_memoryless_strategy(Game, Expansion, Strategy, standard).
@@ -31,23 +32,6 @@ memoryless_strategy_to_dot(Out, Game, Expansion, Strategy, Mode) :-
   transitions_to_dot(Out, Game, Expansion, Strategy),
   observations_to_dot(Out, Game, Expansion).
 
-
-strategy_transitions_to_dot(Out, Game, Expansion, Strategy) :-
-  forall(
-    game(Game, Expansion, location(From)),
-    (
-      get_assoc(From, Strategy, ActionProfile),
-      forall(
-        game(Game, Expansion, transition(From, ActionProfile, To)),
-        (
-          dot_arc_id(Out, From, To, [label(ActionProfile)]);
-          % when there is no transition between two locations
-          % we write nothing to the stream
-          format(Out, '', [])
-        )
-      )
-    )
-  ).
 
 transitions_to_dot(Out, Game, Expansion, Strategy) :-
   forall(

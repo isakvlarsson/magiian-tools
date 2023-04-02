@@ -8,6 +8,8 @@
 ]).
 
 :- use_module(library(term_ext)).
+:- dynamic location_pointer/3.
+:- table unfold_location_pointer/3, actual_location/3.
 /*
  * ############# Location pointers #########################
  * */
@@ -26,7 +28,6 @@
 
 %% store the id of a location with its real name
 % only stores a pointer once
-:- dynamic location_pointer/3.
 create_location_pointer(Game, Location, Pointer) :-
   location_pointer(Game, Location, Pointer), !;
   ascii_id(Location, Pointer),
