@@ -17,13 +17,24 @@
  * Notice that the objective of shaking the glass is
  * a parity objective, as we discussed earlier.
  * */ 
- agents([robot1, robot2]).
+agents([robot1, robot2]).
 
- transitions(start, [init, init], left).
- transitions(start, [init, init], right).
+initial(start).
 
- transition(left, [wait, wait], left).
- transition(left, [wait, push], left).
- transition(left, [push, wait], left).
- transition(left, [push, pull], right).
- transition(left, [pull, push], right).
+transition(start, [init, init], left).
+transition(start, [init, init], right).
+
+transition(left, [push, pull], right).
+transition(left, [pull, push], left).
+transition(left, [push, push], lose).
+transition(left, [pull, pull], lose).
+
+transition(right, [pull, push], left).
+transition(right, [push, pull], right).
+transition(right, [push, push], lose).
+transition(right, [pull, pull], lose).
+
+transition(lose, [pull, pull], lose).
+
+equal(robot1, [left, right]).
+equal(robot2, [left, right]).

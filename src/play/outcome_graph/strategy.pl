@@ -5,6 +5,8 @@
     get_strategy/3
   ]).
 
+:- use_module('../../utils').
+
 /*
  * A strategy maps locations to action profiles.
  *
@@ -59,6 +61,7 @@ put_agent_strategy(L, Strategy, Act, Strategy) :-
   get_agent_strategy(L, Strategy, [Act|_]).
 put_agent_strategy(L, [LO, OA], Act, [LO, OA1]) :-
   get_agent_strategy(L, [LO, OA], PrevActs),
+  get_assoc(L, LO, O),
   put_assoc(O, OA, [Act|PrevActs], OA1).
 
 %% get the actions taken in a strategy

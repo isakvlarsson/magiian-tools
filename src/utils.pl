@@ -3,8 +3,11 @@
   intersection_all/2,
   union_all/2,
   zip_pair/3,
+  head/2,
   tail/2,
-  same/2
+  same/2,
+  pair_default/3,
+  max/2
 ]).
 
 :- meta_predicate setofall(?, 0, -).
@@ -95,6 +98,8 @@ max([H|T], Acc, Max) :-
 % with maplist
 pair_default(Val, Key, Key-Val).
 
+%% get the head of a list
+head([H|T], H).
 %% get the tail of a list
 tail([], []).
 tail([H|T], T).

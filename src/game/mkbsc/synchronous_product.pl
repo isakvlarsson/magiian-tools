@@ -40,7 +40,7 @@ expanded_transitions(Game, Expansion, JointKnowledge, Transitions) :-
       game(Game, action_profile(ActP)),
       game_post(Game, Expansion, CommonKnowledge, ActP, S), 
       maplist(projection(Game, Expansion, 1), Agents, JointKnowledge, ActP, K),
-      %\+intersection(S, K, []),
+      % pruning
       intersection_all(K, KCommon),
       KCommon \== [],
       \+intersection(KCommon, S, [])
