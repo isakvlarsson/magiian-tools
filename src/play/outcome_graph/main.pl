@@ -1,4 +1,5 @@
 :- module(outcome_graph, [
+  create_outcome_graph/2,
   create_outcome_graph/3,
   unload_outcome_graph/2,
   outcome_graph_node/4,
@@ -9,6 +10,10 @@
 :- use_module(library(term_ext)).
 
 :- dynamic outcome_graph_node/4, outcome_graph_edge/5.
+
+%% defaults to memoryless strategy
+create_outcome_graph(G, K) :-
+  create_outcome_graph(G, K, 1).
 
 create_outcome_graph(G, K, MaxMem) :-
   unload_outcome_graph(G, K),
@@ -38,15 +43,18 @@ create_outcome_graph(G, K, MaxMem, Node, S, V) :-
         member(Next, Nexts),
         %% handle non-determinism by reseting visited
         (
+          length(Nexts, TransitionsForAction),
           visited_inc(Loc, V, V1),
-          max_visited(Next, V1, 0),
-          create_outcome_graph_node(G, K, Next, NextNode),
-          create_outcome_graph_edge(G, K, Node, Act, NextNode),
-          create_outcome_graph(G, K, MaxMem, NextNode, S1, V1),
-          !;
-
-          last_loc_node_in_path(G, K, Next, NextNode, Node),
-          create_outcome_graph_edge(G, K, Node, Act, NextNode)
+          (
+            % nondeterminism
+            TransitionsForAction > 1 ->
+              empty_visited(G, K, V0),
+              take_action(G, K, MaxMem, Node, Act, Next, S1, V0);
+            % normal transition
+            
+            % loop encountered
+            
+          )
         )
       )
     )
@@ -54,6 +62,11 @@ create_outcome_graph(G, K, MaxMem, Node, S, V) :-
   !.
 
 create_outcome_graph(_, _, _, _, _, _) :- !.
+
+take_action(G, K, MaxMem, Node, Act, Next, S, V) :-
+  create_outcome_graph_node(G, K, Next, NextNode),
+  create_outcome_graph_edge(G, K, Node, Act, NextNode),
+  create_outcome_graph(G, K, MaxMem, NextNode, S, V).
 
 %% these are random names for
 % locations, so that we can
