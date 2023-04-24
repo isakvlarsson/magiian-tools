@@ -1,6 +1,6 @@
 :- module(visualize_outcome, [
-  view_outcome/1,
-  export_outcome/3   
+  view_outcome/2,
+  export_outcome/4   
 ]).
 
 :- use_module(library(gv)).
@@ -8,20 +8,19 @@
 :- use_module('../../utils').
 :- use_module('dot').
 
-view_outcome(Outcome) :-
+view_outcome(Outcome, Strategy) :-
   gv_view(
-    {Outcome}/[Out]>>outcome_to_dot(Out, Outcome, _),
+    {Outcome, Strategy}/[Out]>>outcome_to_dot(Out, Outcome, _),
     [directed(true), method(dot)]
   ).
 
-export_outcome(Game, Expansion, Outcome) :-
+export_outcome(Game, Expansion, Outcome, Strategy) :-
   format(atom(Filename), 'images/~a_K~a_outcome.png', [Game, Expansion]),
   gv_export(
     Filename,
-    {Outcome}/[Out]>>outcome_to_dot(Out, Outcome, _),
+    {Outcome, Strategy}/[Out]>>outcome_to_dot(Out, Outcome, _),
     [directed(true), method(dot)]
   ).
-
 
 outcome_to_dot(Out, [fork(Forks)], Id) :-
   maplist(split_path, Forks, Hs, Paths),

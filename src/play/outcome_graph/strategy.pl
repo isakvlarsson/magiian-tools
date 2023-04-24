@@ -2,6 +2,8 @@
   [
     empty_strategy/3,
     put_strategy/4,
+    get_agents_strategy/3,
+    max_acts/3,
     get_strategy/3
   ]).
 
@@ -32,8 +34,20 @@ put_strategy(L, Strategy0, Act, Strategy1) :-
 % on this location (the individual
 % agents may have taken their action on
 % som other location in their observaiton)
-get_strategy(L, Strategy, Acts) :-
+get_agents_strategy(L, Strategy, Acts) :-
   maplist(get_agent_strategy(L), Strategy, Acts).
+
+%% true if no agent has more than Num
+% elements in their acts at Loc
+max_acts(Loc, S, Num) :-
+  get_agents_strategy(Loc, S, Acts),
+  maplist(length, Acts, ActsLen),
+  forall(member(X, ActsLen), X =< Num).
+
+%% get the action-profile for a location
+get_strategy(Loc, S, Act) :-
+  get_agents_strategy(Loc, S, AgentsActs),
+  maplist(head, AgentsActs, Act).
 
 /*
  * Predicates for the individual strategies.
@@ -68,3 +82,5 @@ put_agent_strategy(L, [LO, OA], Act, [LO, OA1]) :-
 get_agent_strategy(L, [LO, OA], Acts) :-
   get_assoc(L, LO, O),
   get_assoc(O, OA, Acts).
+
+
