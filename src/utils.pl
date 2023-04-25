@@ -99,7 +99,7 @@ max([H|T], Acc, Max) :-
 pair_default(Val, Key, Key-Val).
 
 %% get the head of a list
-head([H|T], H).
+head([H|_], H).
 %% get the tail of a list
 tail([], []).
-tail([H|T], T).
+tail([_|T], T).

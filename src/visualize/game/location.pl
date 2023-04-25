@@ -66,7 +66,7 @@ locations_to_dot_actual(Out, Game, Expansion) :-
 
 % ############## single-agent / projection ############
 
-agent_locations_to_dot(Out, G, K, Agt, 0, Mode) :-
+agent_locations_to_dot(Out, G, K, Agt, 0, _) :-
   forall(
     projection(G, K, Agt, 0, location(L)),
     (
@@ -76,7 +76,7 @@ agent_locations_to_dot(Out, G, K, Agt, 0, Mode) :-
   ),
   !.
 
-agent_locations_to_dot(Out, G, K, Agt, 1, Mode) :-
+agent_locations_to_dot(Out, G, K, Agt, 1, _) :-
   forall(
     projection(G, K, Agt, 1, location(L)),
     my_dot_node(Out, L)

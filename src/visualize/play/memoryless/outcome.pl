@@ -5,7 +5,7 @@
 
 :- use_module(library(gv)).
 :- use_module(library(term_ext)).
-:- use_module('../../utils').
+:- use_module('../../../utils').
 :- use_module('dot').
 
 view_outcome(Outcome, Strategy) :-
@@ -33,7 +33,7 @@ outcome_to_dot(Out, [fork(Forks)], Id) :-
 outcome_to_dot(Out, [loop([H|T])], Id) :-
   dot_id(Id),
   outcome_node_id(Out, Id, H),
-  loop_to_dot(Out, T, IdNext, Id),
+  loop_to_dot(Out, T, _, Id),
   !.
 outcome_to_dot(Out, [H|T], Id) :-
   dot_id(Id),
@@ -43,13 +43,13 @@ outcome_to_dot(Out, [H|T], Id) :-
   outcome_edge_id(Out, Id, IdNext);
   format(Out, '', []),
   !.
-outcome_to_dot(Out, [], no).
+outcome_to_dot(_, [], no).
 
 loop_to_dot(Out, [], _, StartId) :-
   outcome_edge_id(Out, StartId, StartId).
-loop_to_dot(Out, [X], Id, StartId) :-
+loop_to_dot(Out, [_], Id, StartId) :-
   dot_id(Id),
-  outcome_node_id(Out, Id, H),
+  outcome_node_id(Out, Id, _),
   outcome_edge_id(Out, Id, StartId),
   !.
 loop_to_dot(Out, [H|T], Id, StartId) :-

@@ -6,7 +6,7 @@
 ]).
 
 :- use_module(library(gv)).
-:- use_module('../game/main', [observations_to_dot/3]).
+:- use_module('../../game/main', [observations_to_dot/3]).
 :- use_module('dot').
 
 view_memoryless_strategy(Game, Expansion, Strategy) :-
@@ -56,7 +56,7 @@ transitions_to_dot(Out, Game, Expansion, Strategy) :-
           sort(Transitions, TransitionsSorted), 
           group_pairs_by_key(TransitionsSorted, Ts),
           forall(
-            member(T-A, Ts),
+            member(_-A, Ts),
             dot_arc_id(Out, From, To, [label(A)])
           )
         )

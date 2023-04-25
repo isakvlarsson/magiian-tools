@@ -2,7 +2,7 @@
   create_projection/3,
   create_expanded_projection/3,
   unload_expanded_projection/3,
-  projection_post/6,
+  projection_post/7,
   projection/5
 ]).
 :- dynamic projection/5.
@@ -67,7 +67,7 @@ expanded_transitions(G, K, Agt, Si, Transitions) :-
     transition(Si, Action, Intersection),
     (
       game(G, action(Action)),
-      projection_post(G, K, InnerK, Agt, Si, Action, Sj),
+      projection_post(G, K, _, Agt, Si, Action, Sj),
       game(G, K, observation(Agt, Observation)),
       intersection(Sj, Observation, Intersection),
       Intersection \== []

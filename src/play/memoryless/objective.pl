@@ -104,6 +104,6 @@ inf_in_outcome([fork(Forks)| T], Acc, Inf) :-
   intersection_all(ForksInf, AllInf),
   append(AllInf, Acc, NewAcc),
   inf_in_outcome(T, NewAcc, Inf), !.
-inf_in_outcome([H|T], Acc, Inf) :-
+inf_in_outcome([_|T], Acc, Inf) :-
   % normal locations are just ignored
   inf_in_outcome(T, Acc, Inf).
