@@ -1,5 +1,6 @@
 :- module(visualize_outcome_graph, [
-  view_outcome_graph/2
+  view_outcome_graph/2,
+  export_outcome_graph/2
 ]).
 
 :- use_module(library(gv)).
@@ -8,6 +9,14 @@
 
 view_outcome_graph(G, K) :-
   gv_view(
+    {G, K}/[Out]>>outcome_graph_to_dot(Out, G, K),
+    [directed(true), method(dot)]
+  ).
+
+export_outcome_graph(G, K) :-
+  format(atom(Filename), 'images/~a_K~a_outcome_graph.png', [G, K]),
+  gv_export(
+    Filename,
     {G, K}/[Out]>>outcome_graph_to_dot(Out, G, K),
     [directed(true), method(dot)]
   ).
@@ -64,7 +73,7 @@ outcome_graph_gotos_to_dot(Out, G, K) :-
   % then the 'edges'
   setofall(
     [End, Id, Type]-Act,
-    outcome_graph_goto_edge(G, K, End, Id, Act, Type),
+    outcome_graph_goto_edge(G, K, End, _, Id, Act, Type, _, _),
     Edges
   ),
   group_pairs_by_key(Edges, GroupedEdges),
