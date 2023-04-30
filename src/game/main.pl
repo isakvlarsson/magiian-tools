@@ -1,6 +1,7 @@
 :- module(game, [
   save_game/1,
-  load_saved_game/1
+  load_saved_game/1,
+  num_strategies/3
 ]).
 :- reexport([parse, 'mkbsc/main']).
 
@@ -39,3 +40,19 @@ load_saved_game(G) :-
     fail
   ),
   seen.
+
+
+% number of strategies possible for a game
+% M = memory usage per location
+num_strategies(G, K, M) :-
+  setofall(
+    L-Act,
+    game(G, K, transition(L, Act, _)),
+    Ls
+  ),
+  group_pairs_by_keys(Ls, Ls1),
+  maplist({}[]).
+
+
+
+

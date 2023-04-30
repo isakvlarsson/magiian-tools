@@ -6,6 +6,7 @@
   outcome_graph_goto/6,
   outcome_graph_goto_edge/9
 ]).
+
 :- use_module(strategy).
 :- use_module('../../utils').
 :- use_module(library(term_ext)).
@@ -83,10 +84,11 @@ take_action(G, K, Node, S, V, History, Act-[Next], Type) :-
     % the outcome graph easier to read and
     % work with, because we mostly care about
     % the locations in the outcome.
+    false,
     outcome_graph_node(G, K, Next, NextNode),
-    outcome_graph_edge(G, K, Node, _, NextNode)->
+    outcome_graph_edge(G, K, Node, _, NextNode, _)->
       create_outcome_graph_edge(G, K, Node, Act, NextNode, Type),
-      create_outcome_graph(G, K, NextNode, S, V)
+      create_outcome_graph(G, K, NextNode, S, V, History)
     ;
       create_outcome_graph_node(G, K, Next, NextNode),
       create_outcome_graph_edge(G, K, Node, Act, NextNode, Type),
@@ -101,6 +103,7 @@ take_action(G, K, Node, S, V, History, Act-[Next], Type) :-
   (
     % as with nodes, we reuse some of these
     % if they point back to the same node
+    false,
     outcome_graph_goto(G, K, Node, LoopStartNode, Backsteps, Id) ->
       create_outcome_graph_goto_edge(G, K, Node, LoopStartNode, Id, Act, Type, S, History)
     ;
@@ -130,7 +133,7 @@ create_outcome_graph_goto_edge(G, K, End, Start, Id, Act, Type, FinalS, History)
 
 unload_outcome_graph(G, K) :-
   retractall(outcome_graph_node(G, K, _, _)),
-  retractall(outcome_graph_edge(G, K, _, _, _)),
+  retractall(outcome_graph_edge(G, K, _, _, _, _)),
   retractall(outcome_graph_goto(G, K, _, _, _, _)),
   retractall(outcome_graph_goto_edge(G, K, _, _, _, _, _, _, _)).
 
