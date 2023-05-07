@@ -10,7 +10,8 @@
   max/2
 ]).
 
-:- meta_predicate setofall(?, 0, -).
+:- use_module(library(term_ext)).
+
 /*
  * ################### General helpers ########################
  * Hera are a collection of helpers that are more generall
@@ -21,6 +22,7 @@
 
 %% predicate to generate a set of all solutions
 % sort of lake findall but with only unique solutions
+:- meta_predicate setofall(?, 0, -).
 setofall(Template, Goal, Set) :-
   findall(Template, Goal, Bag),
   sort(Bag, Set).
@@ -103,3 +105,9 @@ head([H|_], H).
 %% get the tail of a list
 tail([], []).
 tail([_|T], T).
+
+
+%% generate random ascii ids
+random_id(Id) :-
+  uuid(U),
+  ascii_id(U, Id).

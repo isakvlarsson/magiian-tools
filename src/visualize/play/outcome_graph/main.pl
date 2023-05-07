@@ -44,20 +44,15 @@ outcome_graph_nodes_to_dot(Out, G, K) :-
 
 outcome_graph_edges_to_dot(Out, G, K) :-
   setofall(
-    [From, To, Type]-Act,
-    outcome_graph_edge(G, K, From, Act, To, Type),
+    [From, To]-Act,
+    outcome_graph_edge(G, K, From, Act, To),
     Transitions
   ),
   group_pairs_by_key(Transitions, GroupedTransitions),
   forall(
-    member([From, To, Type]-Acts, GroupedTransitions),
+    member([From, To]-Acts, GroupedTransitions),
     (
-      % deterministic
-      Type = det ->
-        dot_arc_id(Out, From, To, [label(Acts)])
-      ;
-      % nondeterministic
-        format(Out, '~w -> ~w [style="dashed" label="~w"]', [From, To, Acts]) 
+      format(Out, '~w -> ~w [label="~w"]', [From, To, Acts]) 
     )
   ).
 
@@ -72,20 +67,15 @@ outcome_graph_gotos_to_dot(Out, G, K) :-
   ),
   % then the 'edges'
   setofall(
-    [End, Id, Type]-Act,
-    outcome_graph_goto_edge(G, K, End, _, Id, Act, Type, _, _),
+    [End, Id]-Act,
+    outcome_graph_goto_edge(G, K, End, _, Id, Act, _, _),
     Edges
   ),
   group_pairs_by_key(Edges, GroupedEdges),
   forall(
-    member([End, Id, Type]-Acts, GroupedEdges),
+    member([End, Id]-Acts, GroupedEdges),
     (
-      % deterministic
-      Type = det ->
-        dot_arc_id(Out, End, Id, [label(Acts)])
-      ;
-      % nondeterministic
-        format(Out, '~w -> ~w [style="dashed" label="~w"]', [End, Id, Acts]) 
+      format(Out, '~w -> ~w [label="~w"]', [End, Id, Acts]) 
     )
   ).
 

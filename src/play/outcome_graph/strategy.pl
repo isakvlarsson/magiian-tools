@@ -3,6 +3,7 @@
     empty_strategy/3,
     put_strategy/4,
     get_agents_strategy/3,
+    get_agent_strategy/3,
     max_acts/3,
     get_strategy/3
   ]).
@@ -24,6 +25,7 @@ empty_strategy(G, K, Strats) :-
   game(G, agents(Agents)),
   maplist(empty_agent_strategy(G, K), Agents, Strats),
   !.
+
 
 %% Create a new strategy with
 % this action profile for this locaiton.
@@ -47,7 +49,10 @@ max_acts(Loc, S, Num) :-
 %% get the action-profile for a location
 get_strategy(Loc, S, Act) :-
   get_agents_strategy(Loc, S, AgentsActs),
-  maplist(head, AgentsActs, Act).
+  maplist(custom_head, AgentsActs, Act).
+
+custom_head([H|T], H).
+custom_head([], noact).
 
 /*
  * Predicates for the individual strategies.

@@ -1,22 +1,25 @@
 :- module(outcome_graph, [
   create_outcome_graph/2,
   unload_outcome_graph/2,
+  create_outcome_graph_node/4,
   outcome_graph_node/4,
-  outcome_graph_edge/6,
+  create_outcome_graph_edge/5,
+  outcome_graph_edge/5,
+  create_outcome_graph_goto/6,
   outcome_graph_goto/6,
-  outcome_graph_goto_edge/9
+  create_outcome_graph_goto_edge/8,
+  outcome_graph_goto_edge/8
 ]).
 
 :- use_module(strategy).
 :- use_module('../../utils').
 :- use_module(library(term_ext)).
-:- use_module('../visited').
-:- reexport([analyze]).
+:- reexport([analyze, optimized, vague_strategy, visited]).
 
 :- dynamic outcome_graph_node/4,
-           outcome_graph_edge/6,
+           outcome_graph_edge/5,
            outcome_graph_goto/6,
-           outcome_graph_goto_edge/9.
+           outcome_graph_goto_edge/8.
 
 create_outcome_graph(G, K) :-
   unload_outcome_graph(G, K),
@@ -50,7 +53,7 @@ create_outcome_graph(G, K, Node, S, V, History) :-
               ActTransitions
             ),
             group_pairs_by_key(ActTransitions, [Act-Nexts]),
-            pre_take_action(G, K, Node, S1, [Loc-Node|V], [Loc|History], Act-Nexts)
+            pre_take_action(G, K, Node, S1, [Loc-Node|V], [Loc-Node|History], Act-Nexts)
           )
         ;
           % we dont want to stop if the above fails
@@ -68,13 +71,13 @@ pre_take_action(G, K, Node, S, _, History, Act-Nexts) :-
   outcome_graph_node(G, K, Loc, Node),
   forall(
     member(Next, Nexts),
-    take_action(G, K, Node, S, [Loc-Node], History, Act-[Next], nondet)
+    take_action(G, K, Node, S, [Loc-Node], History, Act-[Next])
   ),
   !.
 pre_take_action(G, K, Node, S, V, History, Act-Next) :-
-  take_action(G, K, Node, S, V, History, Act-Next, det).
+  take_action(G, K, Node, S, V, History, Act-Next).
 
-take_action(G, K, Node, S, V, History, Act-[Next], Type) :-
+take_action(G, K, Node, S, V, History, Act-[Next]) :-
   % normal transition
   \+memberchk(Next-_, V),
   (
@@ -86,17 +89,17 @@ take_action(G, K, Node, S, V, History, Act-[Next], Type) :-
     % the locations in the outcome.
     false,
     outcome_graph_node(G, K, Next, NextNode),
-    outcome_graph_edge(G, K, Node, _, NextNode, _)->
-      create_outcome_graph_edge(G, K, Node, Act, NextNode, Type),
+    outcome_graph_edge(G, K, Node, _, NextNode)->
+      create_outcome_graph_edge(G, K, Node, Act, NextNode),
       create_outcome_graph(G, K, NextNode, S, V, History)
     ;
       create_outcome_graph_node(G, K, Next, NextNode),
-      create_outcome_graph_edge(G, K, Node, Act, NextNode, Type),
+      create_outcome_graph_edge(G, K, Node, Act, NextNode),
       create_outcome_graph(G, K, NextNode, S, V, History)
   ),
   !.
 
-take_action(G, K, Node, S, V, History, Act-[Next], Type) :-
+take_action(G, K, Node, S, V, History, Act-[Next]) :-
   % there is a loop
   memberchk(Next-LoopStartNode, V),
   nth0(Backsteps, V, Next-LoopStartNode),
@@ -105,10 +108,10 @@ take_action(G, K, Node, S, V, History, Act-[Next], Type) :-
     % if they point back to the same node
     false,
     outcome_graph_goto(G, K, Node, LoopStartNode, Backsteps, Id) ->
-      create_outcome_graph_goto_edge(G, K, Node, LoopStartNode, Id, Act, Type, S, History)
+      create_outcome_graph_goto_edge(G, K, Node, LoopStartNode, Id, Act, S, History)
     ;
       create_outcome_graph_goto(G, K, Node, LoopStartNode, Backsteps, Id),
-      create_outcome_graph_goto_edge(G, K, Node, LoopStartNode, Id, Act, Type, S, History)
+      create_outcome_graph_goto_edge(G, K, Node, LoopStartNode, Id, Act, S, History)
   ),
   !.
 
@@ -121,21 +124,22 @@ create_outcome_graph_node(G, K, L, N) :-
   ascii_id(U, N),
   assertz(outcome_graph_node(G, K, L, N)).
 
-create_outcome_graph_edge(G, K, N1, Act, N2, Type) :-
-  assertz(outcome_graph_edge(G, K, N1, Act, N2, Type)).
+create_outcome_graph_edge(G, K, N1, Act, N2) :-
+  assertz(outcome_graph_edge(G, K, N1, Act, N2)).
 
 create_outcome_graph_goto(G, K, End, Start, Back, Id) :-
   random_id(Id),
   assertz(outcome_graph_goto(G, K, End, Start, Back, Id)).
 
-create_outcome_graph_goto_edge(G, K, End, Start, Id, Act, Type, FinalS, History) :-
-  assertz(outcome_graph_goto_edge(G, K, End, Start, Id, Act, Type, FinalS, History)).
+create_outcome_graph_goto_edge(G, K, End, Start, Id, Act, FinalS, History) :-
+  assertz(outcome_graph_goto_edge(G, K, End, Start, Id, Act, FinalS, History)).
 
 unload_outcome_graph(G, K) :-
   retractall(outcome_graph_node(G, K, _, _)),
-  retractall(outcome_graph_edge(G, K, _, _, _, _)),
+  retractall(outcome_graph_edge(G, K, _, _, _)),
   retractall(outcome_graph_goto(G, K, _, _, _, _)),
-  retractall(outcome_graph_goto_edge(G, K, _, _, _, _, _, _, _)).
+  retractall(outcome_graph_goto_edge(G, K, _, _, _, _, _, _)),
+  retractall(outcome_graph_goto_link(G, K, _, _)).
 
 random_id(Id) :-
   uuid(U),

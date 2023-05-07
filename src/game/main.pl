@@ -50,8 +50,7 @@ num_strategies(G, K, M) :-
     game(G, K, transition(L, Act, _)),
     Ls
   ),
-  group_pairs_by_keys(Ls, Ls1),
-  maplist({}[]).
+  group_pairs_by_keys(Ls, Ls1).
 
 
 
