@@ -51,7 +51,7 @@ get_strategy(Loc, S, Act) :-
   get_agents_strategy(Loc, S, AgentsActs),
   maplist(custom_head, AgentsActs, Act).
 
-custom_head([H|T], H).
+custom_head([H|_], H).
 custom_head([], noact).
 
 /*

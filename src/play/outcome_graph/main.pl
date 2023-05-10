@@ -14,7 +14,7 @@
 :- use_module(strategy).
 :- use_module('../../utils').
 :- use_module(library(term_ext)).
-:- reexport([analyze, optimized, vague_strategy, visited]).
+:- reexport([optimized, vague_strategy, visited, traverse]).
 
 :- dynamic outcome_graph_node/4,
            outcome_graph_edge/5,

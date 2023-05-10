@@ -8,6 +8,7 @@
 :- use_module(library(gv)).
 :- use_module('../../game/main', [observations_to_dot/3]).
 :- use_module('dot').
+:- use_module('../../../play/outcome_graph/strategy', [get_strategy/3]).
 
 view_memoryless_strategy(Game, Expansion, Strategy) :-
   view_memoryless_strategy(Game, Expansion, Strategy, standard).
@@ -41,7 +42,8 @@ transitions_to_dot(Out, Game, Expansion, Strategy) :-
       forall(
         game(Game, Expansion, transition(From, Act, To)),
         strategy_edge_id(Out, From, To, Act)
-      ),
+      ) 
+      ,
       forall(
         game(Game, Expansion, location(To)),
         (

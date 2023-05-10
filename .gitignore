@@ -8,3 +8,5 @@ images/*
 !/wagon_game_K2.png
 !/wagon_game_K3.png
 !/wagon_game_K4.png
+# dont save things in the random folder
+random/*

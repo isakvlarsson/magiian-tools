@@ -59,7 +59,9 @@ locations_to_dot_actual(Out, Game, Expansion) :-
     game(Game, Expansion, location(Location)), 
     (
       actual_location(Game, Location, Name),
-      dot_node_id(Out, Location, [label(Name)])
+      location_born(Game, Expansion, Location, Number),
+      format(atom(Label), '~w (K=~w)', [Name, Number]),
+      dot_node_id(Out, Location, [label(Label)])
     )
   ).
 

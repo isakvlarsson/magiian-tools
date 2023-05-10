@@ -5,7 +5,6 @@
 :- use_module(strategy).
 :- use_module(main).
 :- use_module(vague_strategy).
-:- use_module(analyze).
 :- use_module('../../utils').
 
 create_optimized_outcome_graph(G, K) :-
@@ -37,7 +36,7 @@ create_optimized_outcome_graph(G, K, Node, S, V, History) :-
       % In that case we do not take it.
       (
         max_acts(Loc, S1, 1) ->
-          possible_action_profiles(G, K, Loc, S1, ActProfiles),
+          possible_action_profiles(G, K, Loc, S1, Acts),
           inc_visited(Loc, V, V1),
           take_action(G, K, Node, Next-Acts, S1, V1, [Loc-Node|History])
         ;
