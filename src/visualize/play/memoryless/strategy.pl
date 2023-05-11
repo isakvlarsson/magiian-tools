@@ -59,7 +59,8 @@ transitions_to_dot(Out, Game, Expansion, Strategy) :-
           group_pairs_by_key(TransitionsSorted, Ts),
           forall(
             member(_-A, Ts),
-            dot_arc_id(Out, From, To, [label(A)])
+            format(Out, '~w -> ~w [label="~w", style="dashed"];\n', [From, To, A])
+            %dot_arc_id(Out, From, To, [label(A)])
           )
         )
       )

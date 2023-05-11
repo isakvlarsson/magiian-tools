@@ -66,7 +66,7 @@ outcome_to_latex(Branches, Out) :-
   middle_branch(Branches, Bm),
   right_branch(Branches, Br),
   maplist(branch_to_latex, [Bl, Bm, Br], BranchesOut),
-  format(atom(Out), '(~w + ~w + ~w)', BranchesOut).
+  format(atom(Out), '$(~w + ~w + ~w)$', BranchesOut).
 
 
 left_branch(Branches, B) :-
@@ -84,7 +84,7 @@ what_branch([prefix([_|[X|_]]), _], X).
 branch_to_latex([prefix(P), omega(O)], Out) :-
   atom_chars(Prefix, P),
   atom_chars(Omega, O),
-  format(atom(Out), '$~w(~w)^w$', [Prefix, Omega]).
+  format(atom(Out), '~w(~w)^w', [Prefix, Omega]).
 
 diffing_outcomes(G, K0, K1, Diff) :-
   unique_outcomes(G, K0, O0),
