@@ -8,8 +8,6 @@
 
 :- use_module('../memoryless/strategy').
 
-%% the actual traversal
-
 %% generate all traversals for a strategy
 traversal(G, K, S, Hs, LSs) :-
   memoryless_strategy(G, K, S),
@@ -39,89 +37,7 @@ strategy_traversal(G, K, S, History, LoopStart, Node) :-
 
 
 
-
-
-
-
-
-
-
-
-%% human readable form
-outcomes_to_latex(Os, Filename):-
-  maplist(outcome_to_latex, Os, Regexes),
-  sort(Regexes, RegexesU),
-  open(Filename, write, Stream),
-  forall(
-    member(Regex, RegexesU),
-    write(Stream, Regex),
-    writeln(Stream, ', ')
-  ),
-  length(RegexesU, Total),
-  format(Stream, 'total: ~', [Total]),
-  close(Stream).
-
-outcome_to_latex(Branches, Out) :-
-  left_branch(Branches, Bl),
-  middle_branch(Branches, Bm),
-  right_branch(Branches, Br),
-  maplist(branch_to_latex, [Bl, Bm, Br], BranchesOut),
-  format(atom(Out), '$(~w + ~w + ~w)$', BranchesOut).
-
-
-left_branch(Branches, B) :-
-  member(B, Branches),
-  what_branch(B, l).
-middle_branch(Branches, B) :-
-  member(B, Branches),
-  what_branch(B, m).
-right_branch(Branches, B) :-
-  member(B, Branches),
-  what_branch(B, r).
-what_branch([prefix([_]), omega([X|_])], X).
-what_branch([prefix([_|[X|_]]), _], X).
-
-branch_to_latex([prefix(P), omega(O)], Out) :-
-  atom_chars(Prefix, P),
-  atom_chars(Omega, O),
-  format(atom(Out), '~w(~w)^w', [Prefix, Omega]).
-
-diffing_outcomes(G, K0, K1, Diff) :-
-  unique_outcomes(G, K0, O0),
-  unique_outcomes(G, K1, O1),
-  subtract(O1, O0, Diff).
-
-save_outcomes(Os, Filename) :-
-  open(Filename, write, Stream),
-  write(Stream, Os),
-  writeln('.'),
-  close(Stream).
-
-unique_outcomes(G, K, Outcomes) :-
-  setofall(
-    O,
-    (
-      an_outcome(G, K, O)
-    ),
-    Outcomes
-  ).
-
-visited_in_branch(L, [prefix(P), omega(O)]) :-
-  memberchk(L, P), 
-  !;
-  memberchk(L, O).
-visited_in_all_branches(L, Bs) :-
-  forall(
-    member(B, Bs),
-    visited_in_branch(L, B)
-  ).
-all_visited_in_all_branches(Ls, Bs) :-
-  forall(
-    member(L, Ls),
-    visited_in_all_branches(L, Bs)
-  ).
-
-parse_outcome(G, Hs, LSs, Parsed) :-
+parse_traversal(G, Hs, LSs, Parsed) :-
   maplist(parse_branch(G), Hs, LSs, Parsed).
 
 parse_branch(G, History, LoopStart, [prefix(ActualPrefix), omega(ActualLoop)]) :-
@@ -142,3 +58,65 @@ find_omega_part([L-_|T], LoopStart, Prefix, LoopAcc, Loop) :-
 history_loc(L-_, L).
 
 
+diffing_traversals(G, K0, K1, Diff) :-
+  unique_traversals(G, K0, O0),
+  unique_traversals(G, K1, O1),
+  subtract(O1, O0, Diff).
+
+unique_traversals(G, K, AllParsed) :-
+  setofall(
+    ParsedS,
+    (
+      traversal(G, K, S, Hs, Ls),
+      parse_traversal(G, Hs, Ls, Parsed),
+      % sorting is needed because different levels
+      % have different ordering of branches
+      sort(Parsed, ParsedS)
+    ),
+    AllParsed
+  ).
+
+
+
+
+%% human readable form
+traversals_to_latex(Os, Filename):-
+  maplist(traversal_to_latex, Os, Regexes),
+  sort(Regexes, RegexesU),
+  open(Filename, write, Stream),
+  forall(
+    member(Regex, RegexesU),
+    (
+      write(Stream, Regex),
+      writeln(Stream, ', ')
+    )
+  ),
+  length(RegexesU, Total),
+  format(Stream, 'total: ~w', [Total]),
+  close(Stream).
+
+traversal_to_latex(Branches, Out) :-
+  maplist(branch_to_latex, Branches, BranchesOut),
+  format(atom(Out), '$(~w + ~w + ~w)$', BranchesOut).
+
+branch_to_latex([prefix(P), omega(O)], Out) :-
+  atom_chars(Prefix, P),
+  atom_chars(Omega, O),
+  format(atom(Out), '~w(~w)^w', [Prefix, Omega]).
+
+%% check for reachability
+
+visited_in_branch(L, [prefix(P), omega(O)]) :-
+  memberchk(L, P), 
+  !;
+  memberchk(L, O).
+visited_in_all_branches(L, Bs) :-
+  forall(
+    member(B, Bs),
+    visited_in_branch(L, B)
+  ).
+all_visited_in_all_branches(Ls, Bs) :-
+  forall(
+    member(L, Ls),
+    visited_in_all_branches(L, Bs)
+  ).
