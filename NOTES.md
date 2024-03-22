@@ -13,8 +13,16 @@ This creates and loads an outcome-graph into the database, with nodes and edges:
 ```prolog
 outcome_graph_node(G, K, L, N).
 ```
-Where N is the unique id for that node
-
+Where N is the unique id for that node, L is the name of the node. For `K >= 0`, `L` is a pointer to a node name, which can be fetched with 
+```prolog
+actual_location(G, L, ActualLocation).
+```
+If you want the knowledge state at that location (the location is unique for every `K`), use 
+```prolog 
+unfold_location_pointer(Game, Location, Name).
+```
+#### Pointers
+The location pointers for `K = 0` is the regular locations (s, l, r), garantueeing that you can use a generic loop for all knowledge levels. 
 ### Edge
 
 ```prolog
