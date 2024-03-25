@@ -31,6 +31,15 @@ outcome_graph_edge(G, K, N1, Act, N2).
 
 Where the edge goes from `N1` to `N2`, with the joint action `Act`.
 
+### Goto Edge
+A Goto edge goes from a normal node to a goto-node.
+```prolog
+outcome_graph_goto_edge(G, K, End, Start, Id, Act, FinalS, History)
+```
+`End` is the last node of the loop.\
+`Start` is the first node of the loop.\
+`Id` is the id of the goto-node.\
+
 ### Goto Node
 
 ```prolog
