@@ -34,9 +34,9 @@ Where the edge goes from `N1` to `N2`, with the joint action `Act`.
 ### Goto Node
 
 ```prolog
-% End is the last node of the loop
-% Start is the first node of the loop
-% Back is the length of the loop
-% Id is the unique id of the goto-node
-create_outcome_graph_goto(G, K, End, Start, Back, Id).
+outcome_graph_goto(G, K, End, Start, Back, Id).
 ```
+`End` is the last node of the loop.\
+`Start` is the first node of the loop.\
+`Back` is the length of the loop. \
+`Id` is the unique id of the goto-node.
