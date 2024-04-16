@@ -3,6 +3,8 @@ games/cache/*
 !games/cache/README.md
 # dont save images
 images/*
+outcomes/*
+!/wagon_game_short_K1_outcomes.txt
 !/README.md
 !/wagon_game_K0.png
 !/wagon_game_K2.png
