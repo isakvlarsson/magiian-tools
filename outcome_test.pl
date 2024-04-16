@@ -4,10 +4,11 @@ wagon_query(K_max):-
 	G = wagon_game_short, 
 	load_game(G), 
 	create_expanded_game(G, K_max),  
-	iterate_k_levels(G, 1, K_max).
+	iterate_k_levels(G, 0, K_max).
 
 
-iterate_k_levels(G, K_max + 1, K_max).
+iterate_k_levels(G, K_max + 1, K_max):-
+!.
 iterate_k_levels(G, K, K_max):-
 	create_outcome_graph(G, K),
 	retractall(visited_goto(G, K, _, _)),
@@ -17,10 +18,12 @@ iterate_k_levels(G, K, K_max):-
 	forall(unique_outcome(G, K, Outcome),
 		(outcome_as_locations(G, K, Outcome, Locations),
 		(unique_simple_outcome(G, _, Locations) -> (true);
-			(assertz(unique_simple_outcome(G, K, Locations)), writeln(Out, Locations)))
+			(assertz(unique_simple_outcome(G, K, Locations)),format_outcome(Locations, String), writeln(Out, String)))
 		)
 	; true),
-	close(Out).
+	close(Out),
+	K1 is K + 1,
+	iterate_k_levels(G, K1, K_max).
 	
 %% Is true if Outcome is a outcome (list of nodes in the outcome graph) of G at level K
 outcome(G, K, Outcome):-
@@ -78,3 +81,17 @@ find_start_node(G, K, Node):-
 	actual_location(G, L, s),
 	Node = outcome_graph_node(G, K, L, N),
 	!.
+
+format_outcome(Outcome, String):-
+	format_outcome(Outcome, String, 0, S),
+	!.
+format_outcome([H], ")", N, StepsToParenthesis):-
+	StepsToParenthesis = N - H - 1.
+format_outcome([H|T], String, N, StepsToParenthesis):-
+	format_outcome(T, String1, N + 1, StepsToParenthesis),
+	atom_string(H, Str),
+	string_concat(Str, String1, String2),
+	(N =:= StepsToParenthesis -> string_concat("(", String2, String); String = String2),
+	!.
+
+	
