@@ -6,6 +6,10 @@ wagon_query(K_max):-
 	create_expanded_game(G, K_max),  
 	iterate_k_levels(G, 0, K_max).
 
+generate_outcomes_as_locations(K_max, G):- 
+	load_game(G), 
+	create_expanded_game(G, K_max),  
+	iterate_k_levels(G, 0, K_max).
 
 iterate_k_levels(G, K_max + 1, K_max):-
 !.
@@ -22,13 +26,15 @@ iterate_k_levels(G, K, K_max):-
 		)
 	; true),
 	close(Out),
-	K1 is K + 1,
-	iterate_k_levels(G, K1, K_max).
+	K1 = K + 1,
+	iterate_k_levels(G, K1, K_max),
+	!.
 	
 %% Is true if Outcome is a outcome (list of nodes in the outcome graph) of G at level K
 outcome(G, K, Outcome):-
 	find_start_node(G, K, outcome_graph_node(G, K, L, N)),
-	outcome(G, K, Outcome, [outcome_graph_node(G, K, L, N)], outcome_graph_node(G, K, L, N)).
+	outcome(G, K, Outcome, [outcome_graph_node(G, K, L, N)], outcome_graph_node(G, K, L, N)),
+	!.
 outcome(G, K, Outcome, Accumulator, Last):-
 	outcome_graph_node(G, K, L, N) = Last,
 	outcome_graph_edge(G, K, N, _, N2), % If there is a normal edge from this node
@@ -77,21 +83,28 @@ outcome_as_locations(G, K, [outcome_graph_node(G, K, L, N)|T], Locations, Acc):-
 
 %% Finds the start node of the outcome graphs and unifies it with `Node`
 find_start_node(G, K, Node):-
-	outcome_graph_node(G, K, L, N),
-	actual_location(G, L, s),
-	Node = outcome_graph_node(G, K, L, N),
+	game(G, K, initial(Init)),
+	Node = outcome_graph_node(G, K, Init, N),
 	!.
 
 format_outcome(Outcome, String):-
 	format_outcome(Outcome, String, 0, S),
 	!.
 format_outcome([H], ")", N, StepsToParenthesis):-
-	StepsToParenthesis = N - H - 1.
+	StepsToParenthesis = N - H - 1,
+	!.
+format_outcome([H|T], String, 0, StepsToParenthesis):-
+	format_outcome(T, String1, 0 + 1, StepsToParenthesis),
+	format(atom(Str), "~a", [H]),
+	string_concat(Str, String1, String),
+	!.
 format_outcome([H|T], String, N, StepsToParenthesis):-
 	format_outcome(T, String1, N + 1, StepsToParenthesis),
-	atom_string(H, Str),
-	string_concat(Str, String1, String2),
-	(N =:= StepsToParenthesis -> string_concat("(", String2, String); String = String2),
+	(N =:= StepsToParenthesis -> 
+		format(atom(Str), ",~c~a", [0x28, H]); 
+		format(atom(Str), ",~a", [H])),
+	string_concat(Str, String1, String),
 	!.
+
 
 	
