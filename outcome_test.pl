@@ -6,13 +6,14 @@ wagon_query(K_max):-
 	create_expanded_game(G, K_max),  
 	iterate_k_levels(G, 0, K_max).
 
-generate_outcomes_as_locations(K_max, G):- 
+generate_outcomes_as_locations(G, K_max):- 
 	load_game(G), 
 	create_expanded_game(G, K_max),  
 	iterate_k_levels(G, 0, K_max).
 
-iterate_k_levels(G, K_max + 1, K_max):-
-!.
+iterate_k_levels(G, K, K_max):-
+	K =:= K_max + 1,
+	!.
 iterate_k_levels(G, K, K_max):-
 	create_outcome_graph(G, K),
 	retractall(visited_goto(G, K, _, _)),
@@ -20,13 +21,14 @@ iterate_k_levels(G, K, K_max):-
 	format(atom(Filename), 'outcomes/~a_K~a_outcomes.txt', [G, K]),
 	open(Filename, write,Out),
 	forall(unique_outcome(G, K, Outcome),
-		(outcome_as_locations(G, K, Outcome, Locations),
-		(unique_simple_outcome(G, _, Locations) -> (true);
-			(assertz(unique_simple_outcome(G, K, Locations)),format_outcome(Locations, String), writeln(Out, String)))
-		)
-	; true),
+		(outcome_as_locations(G, K, Outcome, Locations),!,
+		(\+unique_simple_outcome(G, _, Locations) -> 
+			(assertz(unique_simple_outcome(G, K, Locations)),format_outcome(Locations, String), writeln(Out, String))
+			;
+			true)
+		)),
 	close(Out),
-	K1 = K + 1,
+	K1 is K + 1,
 	iterate_k_levels(G, K1, K_max),
 	!.
 	
@@ -77,7 +79,7 @@ outcome_as_locations(G, K, [outcome_graph_goto(G, K, End, Start, Back, Id)], Loc
 	append(Acc, [Back], Acc2),
 	Locations = Acc2.
 outcome_as_locations(G, K, [outcome_graph_node(G, K, L, N)|T], Locations, Acc):-
-	actual_location(G, L, ActualLocation),
+	(actual_location(G, L, ActualLocation); ActualLocation = L),
 	append(Acc, [ActualLocation], Acc2),
 	outcome_as_locations(G, K, T, Locations, Acc2).
 
@@ -86,7 +88,9 @@ find_start_node(G, K, Node):-
 	game(G, K, initial(Init)),
 	Node = outcome_graph_node(G, K, Init, N),
 	!.
-
+%% Formats a list of locations (with a number et the end) 
+%  as a string of comma-separated locations with the repeating part in parentheses
+%  Ex. Outcome = [s, l, m, 1] String = "s,(l,m)" 
 format_outcome(Outcome, String):-
 	format_outcome(Outcome, String, 0, S),
 	!.
