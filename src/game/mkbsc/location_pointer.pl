@@ -82,8 +82,13 @@ actual_location(Game, Location, Location) :-
 actual_location(Game, LocationPointer, Actual) :-
   location_pointer(Game, Location, LocationPointer),
   intersection_all(Location, [I]),
+  actual_location(Game, I, Actual),
+  !.
+actual_location(Game, LocationPointer, Actual):-
+  location_pointer(Game, Location, LocationPointer),
+  intersection_all(Location, [A, B]),
+  member(I, [A, B]),
   actual_location(Game, I, Actual).
-  
 
 % ################# helpers #################
 

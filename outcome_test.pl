@@ -21,12 +21,12 @@ iterate_k_levels(G, K, K_max):-
 	format(atom(Filename), 'outcomes/~a_K~a_outcomes.txt', [G, K]),
 	open(Filename, write,Out),
 	forall(unique_outcome(G, K, Outcome),
-		(outcome_as_locations(G, K, Outcome, Locations),!,
+		(forall(outcome_as_locations(G, K, Outcome, Locations),
 		(\+unique_simple_outcome(G, _, Locations) -> 
 			(assertz(unique_simple_outcome(G, K, Locations)),format_outcome(Locations, String), writeln(Out, String))
 			;
 			true)
-		)),
+		))),
 	close(Out),
 	K1 is K + 1,
 	iterate_k_levels(G, K1, K_max),
@@ -79,7 +79,7 @@ outcome_as_locations(G, K, [outcome_graph_goto(G, K, End, Start, Back, Id)], Loc
 	append(Acc, [Back], Acc2),
 	Locations = Acc2.
 outcome_as_locations(G, K, [outcome_graph_node(G, K, L, N)|T], Locations, Acc):-
-	(actual_location(G, L, ActualLocation); ActualLocation = L),
+	actual_location(G, L, ActualLocation),
 	append(Acc, [ActualLocation], Acc2),
 	outcome_as_locations(G, K, T, Locations, Acc2).
 
