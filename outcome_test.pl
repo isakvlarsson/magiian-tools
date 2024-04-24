@@ -1,12 +1,16 @@
 :- dynamic visited_goto/2, unique_simple_outcome/3.
 
-wagon_query(K_max):-
-	G = wagon_game_short, 
+export_game_graphs(G, K_max):-
 	load_game(G), 
 	create_expanded_game(G, K_max),  
-	iterate_k_levels(G, 0, K_max).
-
-generate_outcomes_as_locations(G, K_max):- 
+	export_game_graphs(G, K_max, K_max).
+export_game_graphs(G, K_max, -1):-
+	!.
+export_game_graphs(G, K_max, K):-
+	export_game(G, K),
+	K1 is K-1,
+	export_game_graphs(G, K_max, K1).
+export_outcomes_as_locations(G, K_max):- 
 	load_game(G), 
 	create_expanded_game(G, K_max),  
 	iterate_k_levels(G, 0, K_max).
