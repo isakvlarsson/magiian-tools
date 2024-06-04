@@ -36,5 +36,5 @@ transition(right, [pull, pull], lose).
 
 transition(lose, [pull, pull], lose).
 
-equal(robot1, [left, right]).
+% equal(robot1, [left, right]).
 equal(robot2, [left, right]).

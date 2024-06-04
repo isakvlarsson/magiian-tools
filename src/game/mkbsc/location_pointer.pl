@@ -82,8 +82,15 @@ actual_location(Game, Location, Location) :-
 actual_location(Game, LocationPointer, Actual) :-
   location_pointer(Game, Location, LocationPointer),
   intersection_all(Location, [I]),
+  actual_location(Game, I, Actual),
+  !.
+actual_location(Game, LocationPointer, Actual):- 
+  % Edge case added, when there is a node where both agents are unsure where they are // Isak Larsson 2024
+  % This is a quickfix for a much bigger issue, where the program cant handle these kinds of cases
+  location_pointer(Game, Location, LocationPointer),
+  intersection_all(Location, [A, B]),
+  member(I, [A, B]),
   actual_location(Game, I, Actual).
-  
 
 % ################# helpers #################
 
