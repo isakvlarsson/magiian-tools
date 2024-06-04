@@ -4,7 +4,10 @@
 To get a better understanding of how to use the internal predicates, we refer to [NOTES.md](./NOTES.md). 
 
 ## Export outcomes as lists
-This functionality was programmed into a seperate file [outcome_test.pl](outcome_test.pl), which means that you have to load both `main.pl` and `outcome_test.pl` to use it.
+This functionality was programmed into a seperate file [outcome_test.pl](outcome_test.pl), which means that you have to load both `main.pl` and `outcome_test.pl` to use it:
+```prolog
+swipl main.pl outcome_test.pl
+```
 
 
 To export the unique outcomes of a game `G` at each knowledge-level up to `K_max`, use:
